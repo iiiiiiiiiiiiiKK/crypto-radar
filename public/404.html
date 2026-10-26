@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Crypto Radar</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #080d0c;
+        color: #8fa29a;
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .box {
+        text-align: center;
+      }
+      .mark {
+        color: #b8f36b;
+        font-size: 28px;
+        letter-spacing: 0.08em;
+      }
+    </style>
+    <script>
+      // Remember the requested deep link and hand over to index.html.
+      (function () {
+        try {
+          sessionStorage.setItem("crypto-radar:redirect", window.location.href);
+        } catch (error) {
+          /* ignore */
+        }
+        window.location.replace("/crypto-radar/");
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="box">
+      <div class="mark">◎ CRYPTO RADAR</div>
+      <p>Loading the terminal…</p>
+    </div>
+  </body>
+</html>

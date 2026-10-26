@@ -1,0 +1,146 @@
+@import "./tokens.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-line;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-bg text-text font-sans text-base antialiased;
+    margin: 0;
+    overflow: hidden;
+    font-variant-numeric: tabular-nums;
+  }
+
+  ::selection {
+    background: rgba(184, 243, 107, 0.28);
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #273530;
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #35463f;
+  }
+
+  button {
+    font: inherit;
+  }
+
+  input,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--cr-accent-hex);
+    outline-offset: 1px;
+  }
+}
+
+@layer components {
+  .cr-panel {
+    @apply bg-panel border border-line rounded;
+  }
+
+  .cr-panel-2 {
+    @apply bg-panel-2 border border-line-soft rounded;
+  }
+
+  .cr-mono {
+    font-family: var(--cr-font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .cr-up {
+    color: var(--cr-up-hex);
+  }
+
+  .cr-down {
+    color: var(--cr-down-hex);
+  }
+
+  .cr-muted {
+    color: var(--cr-muted-hex);
+  }
+
+  .cr-label {
+    @apply text-2xs uppercase tracking-wider text-muted;
+  }
+
+  .cr-btn {
+    @apply inline-flex items-center justify-center gap-1.5 h-7 px-2.5 rounded border border-line
+      bg-panel-2 text-xs text-text transition-colors duration-100
+      hover:border-accent hover:text-accent disabled:opacity-40 disabled:pointer-events-none;
+  }
+
+  .cr-btn-primary {
+    @apply border-accent bg-accent text-bg hover:text-accent;
+  }
+
+  .cr-btn-icon {
+    @apply w-7 px-0;
+  }
+
+  .cr-input {
+    @apply h-7 px-2 rounded border border-line bg-panel-2 text-xs w-full
+      placeholder:text-faint focus:border-accent focus:outline-none;
+  }
+
+  .cr-select {
+    @apply h-7 px-1.5 rounded border border-line bg-panel-2 text-xs
+      focus:border-accent focus:outline-none cursor-pointer;
+  }
+
+  .cr-tab {
+    @apply inline-flex items-center h-7 px-2.5 rounded text-xs text-muted
+      transition-colors duration-100 hover:text-text whitespace-nowrap;
+  }
+
+  .cr-tab-active {
+    @apply bg-accent text-bg;
+  }
+
+  .cr-chip {
+    @apply inline-flex items-center gap-1 h-5 px-1.5 rounded-sm text-2xs border border-line bg-panel-2;
+  }
+
+  .cr-scroll {
+    @apply overflow-y-auto overscroll-contain;
+  }
+
+  .cr-th {
+    @apply sticky top-0 z-10 bg-panel text-2xs uppercase tracking-wider text-muted
+      font-medium px-2 py-1.5 border-b border-line whitespace-nowrap select-none;
+  }
+
+  .cr-td {
+    @apply px-2 border-b border-line-soft whitespace-nowrap text-xs;
+  }
+
+  .cr-table-head {
+    @apply flex items-center gap-2 px-2 border-b border-line bg-panel;
+  }
+}

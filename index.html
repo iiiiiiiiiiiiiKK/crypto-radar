@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Crypto Radar — real-time crypto market terminal for Binance spot, USDⓈ-M perpetuals and Alpha tokens: live tickers, candlestick charts, technical indicators, watchlists and an anomaly screener."
+    />
+    <meta property="og:title" content="Crypto Radar — Real-time Crypto Market Terminal" />
+    <meta
+      property="og:description"
+      content="Professional real-time market terminal: Binance spot, perpetual futures and Alpha tokens with live WebSocket tickers, candlestick charts, MA/EMA/RSI/MACD, watchlists and a market screener."
+    />
+    <meta property="og:type" content="website" />
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <title>Crypto Radar — 实时加密货币行情终端</title>
+    <script>
+      // GitHub Pages has no SPA fallback: unknown paths are served with
+      // 404.html, which stores the target and redirects back here.
+      (function () {
+        try {
+          var stored = sessionStorage.getItem("crypto-radar:redirect");
+          if (stored) {
+            sessionStorage.removeItem("crypto-radar:redirect");
+            var target = new URL(stored, window.location.origin);
+            if (target.pathname.indexOf("/crypto-radar") === 0) {
+              window.history.replaceState({}, "", target.pathname + target.search + target.hash);
+            }
+          }
+        } catch (error) {
+          /* storage unavailable — the router falls back to the default route */
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
