@@ -25,7 +25,7 @@ endpoints, and every screen reacts to a live WebSocket feed.
 | **Candlestick charts** | Lightweight Charts with volume, 15 intervals, historical paging, a live-updating last candle, crosshair OHLC readout and a price line. |
 | **Technical indicators** | MA, EMA, RSI and MACD — each toggleable, configurable and rendered on top of the chart without a page reload. |
 | **Watchlists** | Multiple named lists, add/remove, rename, reorder, persisted in `localStorage` with corruption-safe reads. |
-| **Market screener** | Live anomaly detection over the real ticker feed: strong gainers, strong losers, high volume, elevated funding, short-term moves and a custom rule set. |
+| **Market screener** | Scans spot, perpetual and Alpha at the same time and renders the anomalies in a virtualised table: strong gainers, strong losers, high volume, elevated funding, short-term moves and a custom rule set. |
 | **Bilingual UI** | Complete Chinese and English interfaces driven by one dictionary, with the choice persisted. |
 
 ## Screenshots
@@ -177,7 +177,8 @@ is served from a sub-path.
 
 ```bash
 npm run test        # 62 unit tests
-npm run test:e2e    # Playwright, desktop + mobile viewports
+npm run test:e2e    # 9 Playwright tests x desktop + mobile viewports
+npm run verify:live # drives the deployed site against the live API
 ```
 
 The unit suite covers price/percentage/precision formatting, indicator maths
@@ -187,9 +188,10 @@ logic and the bilingual dictionary.
 
 The end-to-end suite drives a real browser against the **live** Binance API and
 checks that rows render, search filters, sorting works, the watchlist survives
-a reload, the chart draws candles and indicators, the screener filters on
-real data, the language toggle switches the interface and that the mobile
-layout does not overflow horizontally.
+a reload, the chart draws candles and indicators, the perpetual table shows
+futures-only data (funding rate), the screener filters on real data, the
+language toggle switches the interface and that the mobile layout does not
+overflow horizontally.
 
 ## Security and privacy
 
@@ -214,7 +216,8 @@ layout does not overflow horizontally.
 - Funding rate, mark price and open interest are only available for perpetual
   contracts.
 - In regions where Binance blocks the API, direct calls fail with HTTP 418/429.
-  Point `VITE_PROXY_BASE` at the bundled edge proxy or use a system proxy.
+  The client rotates through Binance's official hostnames, and the bundled edge
+  proxy repeats the rotation from a server-side IP.
 - The screener uses the 24 h open price for the short-window calculation
   because Binance does not publish a free short-interval change field for
   every symbol.

@@ -12,7 +12,7 @@ test("overview loads live market rows", async ({ page }) => {
   });
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto("");
+  await page.goto("/");
   await expect(page.getByTestId("market-table")).toBeVisible({ timeout: 90_000 });
 
   await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
@@ -57,7 +57,7 @@ test("sorting by change percent works", async ({ page }) => {
   await page.goto("spot");
   await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
   await page.getByRole("button", { name: /涨跌幅|change %/i }).first().click();
-  await page.waitForTimeout(400);
+  await page.waitForTimeout(600);
   const symbols = await page.getByTestId("market-row").evaluateAll((nodes) =>
     nodes.slice(0, 3).map((node) => node.getAttribute("data-symbol")),
   );
@@ -96,27 +96,48 @@ test("chart page renders candles and indicators", async ({ page }) => {
   await page.getByTestId("indicator-ma").click();
   await page.getByTestId("indicator-rsi").click();
   await page.getByTestId("interval-1h").click();
-  await page.waitForTimeout(1500);
+  await page.waitForTimeout(2500);
   await expect(page.getByTestId("price-chart")).toBeVisible();
+});
+
+test("perpetual market shows futures-only data", async ({ page }) => {
+  await page.goto("perp");
+  await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
+
+  // The perpetual table must contain contracts, not spot pairs.
+  const symbols = await page.getByTestId("market-row").evaluateAll((nodes) =>
+    nodes.slice(0, 5).map((node) => node.getAttribute("data-symbol")),
+  );
+  expect(symbols.length).toBeGreaterThan(0);
+  expect(symbols[0]).toMatch(/USDT|USDC|BUSD/);
+
+  // Funding rate is a real futures field — it must appear once enabled.
+  await page.getByTestId("open-columns").click();
+  await expect(page.getByTestId("column-fundingRate")).toBeVisible();
+  await page.getByTestId("column-fundingRate").check();
+  await page.keyboard.press("Escape");
+  await page.waitForTimeout(2500);
+
+  const row = await page.getByTestId("market-row").first().innerText();
+  expect(row).toMatch(/-?\d+\.\d{4}%/);
 });
 
 test("screener filters on real data", async ({ page }) => {
   await page.goto("screener");
-  await expect(page.getByTestId("market-table").or(page.getByTestId("screener-row")).first()).toBeVisible({
-    timeout: 90_000,
-  });
+  await expect(page.getByTestId("screener-table")).toBeVisible({ timeout: 90_000 });
   await page.getByTestId("template-gainers").click();
   await page.getByTestId("rule-min-change").fill("3");
-  await page.waitForTimeout(800);
+  await page.waitForTimeout(2500);
   const rows = page.getByTestId("screener-row");
   const count = await rows.count();
+  expect(count).toBeGreaterThan(0);
   for (let i = 0; i < Math.min(count, 5); i += 1) {
     await expect(rows.nth(i)).toBeVisible();
   }
 });
 
 test("language toggle switches the interface", async ({ page }) => {
-  await page.goto("");
+  await page.goto("/");
   await expect(page.getByTestId("global-search")).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Primary" }).first();
   await expect(nav).toContainText("行情总览");
