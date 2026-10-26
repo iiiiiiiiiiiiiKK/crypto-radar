@@ -32,7 +32,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           charts: ["lightweight-charts"],
-          table: ["@tanstack/react-table", "@tanstack/react-virtual"],
+          table: ["@tanstack/react-virtual"],
         },
       },
     },
