@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
 import { OverviewPage } from "@/features/spot/OverviewPage";
@@ -9,21 +8,11 @@ import { ChartPage } from "@/features/chart/ChartPage";
 import { ScreenerPage } from "@/features/screener/ScreenerPage";
 import { WatchlistsPage } from "@/features/watchlist/WatchlistsPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
-import { useMarketStore } from "@/stores/marketStore";
-import { useSettingsStore } from "@/stores/settingsStore";
 
 export function App() {
-  const setMarket = useMarketStore((state) => state.setMarket);
-  const lastMarket = useSettingsStore((state) => state.lastMarket);
-
-  useEffect(() => {
-    if (lastMarket === "spot" || lastMarket === "futures" || lastMarket === "alpha") {
-      setMarket(lastMarket);
-    }
-    // Only on mount — the store keeps the feed alive afterwards.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
+  // Every page owns its market through `useMarketData`. The shared feed is
+  // started and stopped by the store, so switching routes never leaves a
+  // dangling subscription behind.
   return (
     <Routes>
       <Route element={<AppLayout />}>

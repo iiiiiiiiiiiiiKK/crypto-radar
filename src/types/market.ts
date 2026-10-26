@@ -97,6 +97,12 @@ export interface MarketAdapter {
   /** Query the adapter for market wide metadata (funding rates, open interest…). */
   fetchExtras?(id: string): Promise<Partial<MarketTicker>>;
   /**
+   * Bulk variant of `fetchExtras`. Binance publishes the funding rate and the
+   * mark price for every perpetual contract in a single response, so the whole
+   * market is enriched with one request instead of one request per pair.
+   */
+  listExtras?(): Promise<Map<string, Partial<MarketTicker>>>;
+  /**
    * Merge the authoritative market metadata (per-pair precision, base and
    * quote assets) into an already rendered ticker list. The heavy
    * `exchangeInfo` payload is fetched in the background so the table can

@@ -1,0 +1,14 @@
+{
+  "name": "crypto-radar-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Edge proxy that forwards a fixed set of public Binance market endpoints to the Crypto Radar front end.",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

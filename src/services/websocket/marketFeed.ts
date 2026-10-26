@@ -1,4 +1,4 @@
-import { getAdapter } from "@/services/binance";
+import { getAdapter, fetchJson } from "@/services/binance";
 import { UPSTREAM } from "@/lib/constants/endpoints";
 import { FLUSH_INTERVAL_MS, STALE_AFTER_MS } from "@/lib/constants/markets";
 import type { ConnectionState, MarketId, MarketTicker } from "@/types/market";
@@ -26,6 +26,8 @@ export class MarketFeed {
   private snapshotMap = new Map<string, MarketTicker>();
   private flushTimer: ReturnType<typeof setTimeout> | null = null;
   private alphaTimer: ReturnType<typeof setInterval> | null = null;
+  private pollTimer: ReturnType<typeof setInterval> | null = null;
+  private lastFrameAt = 0;
   private disposed = false;
 
   constructor(
@@ -57,6 +59,22 @@ export class MarketFeed {
 
     // The heavy exchange metadata is merged in afterwards so the first paint
     // is not blocked by a multi-megabyte payload.
+    if (adapter.listExtras) {
+      void adapter
+        .listExtras()
+        .then((extras) => {
+          if (this.disposed || extras.size === 0) return;
+          const enriched = this.snapshot.map((ticker) => {
+            const extra = extras.get(ticker.symbol);
+            return extra ? { ...ticker, ...extra } : ticker;
+          });
+          this.applySnapshot(enriched);
+        })
+        .catch(() => {
+          /* the table keeps working without the futures-only columns */
+        });
+    }
+
     if (adapter.applyMetadata) {
       void adapter
         .applyMetadata(this.snapshot)
@@ -85,9 +103,45 @@ export class MarketFeed {
     });
 
     this.unsubscribe = this.manager.subscribe(["!miniTicker@arr"], (payload) => {
+      this.lastFrameAt = Date.now();
       this.handleMiniTicker(payload);
     });
     this.manager.connect();
+
+    // Some networks block the futures websocket. A light REST poll keeps the
+    // prices moving in that case instead of freezing the table.
+    if (this.market === "futures") {
+      this.pollTimer = setInterval(() => {
+        if (this.disposed) return;
+        if (Date.now() - this.lastFrameAt < 20_000) return;
+        void this.pollTickers();
+      }, 8_000);
+    }
+  }
+
+  /** Light-weight refresh used when the websocket cannot deliver data. */
+  private async pollTickers(): Promise<void> {
+    try {
+      const raw = await fetchJson(
+        { market: this.market, path: this.market === "futures" ? "/fapi/v1/ticker/price" : "/api/v3/ticker/price" },
+        { timeoutMs: 12_000 },
+      );
+      if (this.disposed) return;
+      const rows = Array.isArray(raw) ? raw : [raw];
+      const updates: MarketTicker[] = [];
+      for (const row of rows) {
+        if (!row || typeof row !== "object") continue;
+        const symbol = typeof row.symbol === "string" ? row.symbol : null;
+        const price = toNumber(row.price);
+        if (!symbol || price === null) continue;
+        const current = this.snapshotMap.get(symbol);
+        if (!current) continue;
+        updates.push({ ...current, price, updatedAt: Date.now() });
+      }
+      if (updates.length > 0) this.events.onTickers(updates);
+    } catch {
+      // The websocket may still deliver data; ignore poll failures.
+    }
   }
 
   private handleMiniTicker(payload: unknown): void {
@@ -174,6 +228,10 @@ export class MarketFeed {
     if (this.alphaTimer) {
       clearInterval(this.alphaTimer);
       this.alphaTimer = null;
+    }
+    if (this.pollTimer) {
+      clearInterval(this.pollTimer);
+      this.pollTimer = null;
     }
   }
 }

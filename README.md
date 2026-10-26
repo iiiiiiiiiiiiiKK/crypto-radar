@@ -124,6 +124,29 @@ Live URL: <https://iiiiiiiiiiiiiKK.github.io/crypto-radar/>
 Because GitHub Pages has no SPA fallback, the repository ships a `404.html`
 that restores deep links such as `/crypto-radar/spot`.
 
+### Edge proxy (optional)
+
+Some networks cannot reach the Binance futures endpoints directly — the exit IP
+is rate limited (HTTP 418/429) or the WebSocket upgrade is blocked. The
+repository bundles a **Cloudflare Worker** that forwards a fixed, market scoped
+set of paths to Binance:
+
+```bash
+cd worker
+npm install
+npx wrangler deploy
+```
+
+Then point the front end at it:
+
+```bash
+VITE_PROXY_BASE=https://<your-worker>.workers.dev npm run build
+```
+
+The proxy is **not** an open relay: the upstream origin and the path prefix
+come from a whitelist, unknown routes return `404` and paths outside the
+documented Binance API are rejected with `400`.
+
 ### Anywhere else
 
 ```bash

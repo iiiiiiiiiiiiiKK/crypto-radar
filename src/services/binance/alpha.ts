@@ -7,32 +7,36 @@ import type { Candle, MarketAdapter, MarketTicker, SymbolMeta } from "@/types/ma
  * `/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list`.
  * The payload already contains price, 24h change, volume, market cap, liquidity
  * and chain metadata — no trading API key is required.
+ *
+ * The endpoint returns `null` for the fields a token does not provide, so the
+ * schema accepts nulls and the adapter maps them to "unavailable".
  */
 const alphaListSchema = z.object({
   code: z.string().optional(),
   data: z.array(
     z.object({
       tokenId: z.string(),
-      chainId: z.string().optional(),
-      chainName: z.string().optional(),
-      contractAddress: z.string().optional(),
-      name: z.string().optional(),
-      symbol: z.string().optional(),
-      iconUrl: z.string().optional(),
-      price: z.string().optional(),
-      percentChange24h: z.string().optional(),
-      volume24h: z.string().optional(),
-      marketCap: z.string().optional(),
-      liquidity: z.string().optional(),
-      priceHigh24h: z.string().optional(),
-      priceLow24h: z.string().optional(),
-      count24h: z.string().optional(),
-      decimals: z.number().optional(),
-      tradeDecimal: z.number().optional(),
-      listingTime: z.number().optional(),
-      alphaId: z.string().optional(),
-      fullyDelisted: z.boolean().optional(),
-      offline: z.boolean().optional(),
+      chainId: z.string().nullable().optional(),
+      chainName: z.string().nullable().optional(),
+      contractAddress: z.string().nullable().optional(),
+      name: z.string().nullable().optional(),
+      symbol: z.string().nullable().optional(),
+      iconUrl: z.string().nullable().optional(),
+      price: z.string().nullable().optional(),
+      percentChange24h: z.string().nullable().optional(),
+      volume24h: z.string().nullable().optional(),
+      marketCap: z.string().nullable().optional(),
+      liquidity: z.string().nullable().optional(),
+      priceHigh24h: z.string().nullable().optional(),
+      priceLow24h: z.string().nullable().optional(),
+      count24h: z.string().nullable().optional(),
+      holders: z.string().nullable().optional(),
+      decimals: z.number().nullable().optional(),
+      tradeDecimal: z.number().nullable().optional(),
+      listingTime: z.number().nullable().optional(),
+      alphaId: z.string().nullable().optional(),
+      fullyDelisted: z.boolean().nullable().optional(),
+      offline: z.boolean().nullable().optional(),
     }),
   ),
 });
@@ -77,11 +81,11 @@ export class AlphaMarketAdapter implements MarketAdapter {
         decimals,
         tickSize: null,
         listingTime: token.listingTime ?? null,
-        chainName: token.chainName,
-        contractAddress: token.contractAddress,
-        iconUrl: token.iconUrl,
-        alphaId: token.alphaId,
-        name: token.name,
+        chainName: token.chainName ?? undefined,
+        contractAddress: token.contractAddress ?? undefined,
+        iconUrl: token.iconUrl ?? undefined,
+        alphaId: token.alphaId ?? undefined,
+        name: token.name ?? undefined,
       });
 
       tickers.push({
@@ -108,10 +112,10 @@ export class AlphaMarketAdapter implements MarketAdapter {
         decimals,
         updatedAt: now,
         listingTime: token.listingTime ?? null,
-        chainName: token.chainName,
-        iconUrl: token.iconUrl,
-        name: token.name,
-        alphaId: token.alphaId,
+        chainName: token.chainName ?? undefined,
+        iconUrl: token.iconUrl ?? undefined,
+        name: token.name ?? undefined,
+        alphaId: token.alphaId ?? undefined,
       });
     }
 

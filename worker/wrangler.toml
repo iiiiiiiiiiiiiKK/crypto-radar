@@ -1,0 +1,10 @@
+name = "crypto-radar-proxy"
+main = "src/index.ts"
+compatibility_date = "2024-11-06"
+
+[vars]
+ALLOWED_ORIGINS = "*"
+UPSTREAM_TIMEOUT_MS = "12000"
+
+[observability]
+enabled = false

@@ -1,4 +1,4 @@
-import { buildUrl, type ApiRoute } from "@/lib/constants/endpoints";
+import { buildUrl, restHosts, type ApiRoute } from "@/lib/constants/endpoints";
 
 export class BinanceHttpError extends Error {
   constructor(
@@ -11,6 +11,14 @@ export class BinanceHttpError extends Error {
   }
 }
 
+/** HTTP 418 is Binance's "IP banned" answer, 429 is the classic rate limit. */
+export class BinanceRateLimitError extends BinanceHttpError {
+  constructor(status: number, path: string, body: string) {
+    super(status, path, body);
+    this.name = "BinanceRateLimitError";
+  }
+}
+
 export interface RequestOptions {
   timeoutMs?: number;
   signal?: AbortSignal;
@@ -19,12 +27,26 @@ export interface RequestOptions {
 
 const DEFAULT_TIMEOUT = 15_000;
 
+/**
+ * The host that answered last is tried first, which keeps the happy path on
+ * a single connection and only rotates when a host starts rate-limiting.
+ */
+const preferredHost = new Map<string, number>();
+
 export async function fetchJson<T>(route: ApiRoute, options: RequestOptions = {}): Promise<T> {
   const { timeoutMs = DEFAULT_TIMEOUT, signal, retries = 2 } = options;
-  const url = buildUrl(route);
+  const hosts = restHosts(route.market);
+  const start = preferredHost.get(route.market) ?? 0;
+  const order = [
+    ...hosts.slice(start),
+    ...hosts.slice(0, start),
+  ];
+
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const hostIndex = attempt % order.length;
+    const url = buildUrl(route, hostIndex);
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
     const onAbort = () => controller.abort();
@@ -38,21 +60,36 @@ export async function fetchJson<T>(route: ApiRoute, options: RequestOptions = {}
       const text = await response.text();
 
       if (!response.ok) {
-        // 4xx responses other than 429 are deterministic — retrying is pointless.
-        const retryable = response.status === 429 || response.status >= 500;
+        if (response.status === 418 || response.status === 429) {
+          // This host is rate limiting us — try the next hostname instead.
+          lastError = new BinanceRateLimitError(response.status, route.path, text.slice(0, 300));
+          if (attempt < retries) {
+            await sleep(200 * (attempt + 1));
+            continue;
+          }
+          throw lastError;
+        }
+        const retryable = response.status >= 500;
         if (!retryable || attempt === retries) {
           throw new BinanceHttpError(response.status, route.path, text.slice(0, 300));
         }
         lastError = new BinanceHttpError(response.status, route.path, text.slice(0, 300));
       } else {
         try {
-          return JSON.parse(text) as T;
+          const parsed = JSON.parse(text) as T;
+          preferredHost.set(route.market, hostIndex);
+          return parsed;
         } catch {
           throw new BinanceHttpError(response.status, route.path, "Malformed JSON response");
         }
       }
     } catch (error) {
-      if (error instanceof BinanceHttpError && error.status < 500 && error.status !== 429) throw error;
+      if (error instanceof BinanceRateLimitError) {
+        lastError = error;
+        if (attempt < retries) continue;
+        throw error;
+      }
+      if (error instanceof BinanceHttpError && error.status < 500) throw error;
       lastError = error;
       if (attempt === retries) break;
       await sleep(400 * 2 ** attempt + Math.random() * 250);

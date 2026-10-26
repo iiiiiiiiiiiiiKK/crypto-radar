@@ -16,6 +16,7 @@ src/
     screener/     anomaly screener rules and page
     watchlist/    watchlist management page
     settings/     preferences page
+    indicators/   MA / EMA / RSI / MACD maths
   services/
     binance/      one adapter per market + shared HTTP client
     websocket/    shared WebSocket manager + market feed
@@ -24,6 +25,8 @@ src/
   lib/            formatting, endpoints, constants
   i18n/           zh / en dictionary
   types/          shared domain types
+
+worker/           optional Cloudflare edge proxy (see worker/README section)
 ```
 
 ## Data flow
@@ -39,6 +42,9 @@ src/
 5. Heavy metadata (per-pair tick size, base/quote assets) is merged in
    afterwards through `applyMetadata`, so the first paint is not blocked by
    the multi-megabyte `exchangeInfo` payload.
+6. The perpetual market is enriched in one extra request through
+   `listExtras()` (funding rate, mark price, index price for every
+   contract).
 
 ## Adapter contract
 
@@ -49,6 +55,7 @@ interface MarketAdapter {
   listTickers(): Promise<MarketTicker[]>;
   listKlines(id, interval, limit?): Promise<Candle[]>;
   fetchExtras?(id): Promise<Partial<MarketTicker>>;
+  listExtras?(): Promise<Map<string, Partial<MarketTicker>>>;
   applyMetadata?(tickers): Promise<MarketTicker[]>;
 }
 ```
@@ -57,6 +64,21 @@ Each market keeps its own field set. The perpetual adapter adds
 `markPrice`, `fundingRate`, `nextFundingTime` and `openInterest`; the
 Alpha adapter adds `chainName`, `contractAddress` and `iconUrl`. Nothing is
 invented to make the three markets look alike.
+
+## Network resilience
+
+Binance rate limits aggressively and serves the same API from several
+hostnames. Both layers therefore rotate:
+
+- **Client** — `restHosts(market)` lists the official hostnames.
+  `fetchJson` walks the list and remembers the host that answered, so a
+  single rate-limited hostname does not break the screen.
+- **Edge proxy** — the bundled Worker repeats the same rotation from a
+  server-side IP and adds a short cache.
+
+The futures WebSocket is blocked on some networks. When no frame arrives for
+20 s the feed falls back to a light REST poll (`/fapi/v1/ticker/price`) so
+the prices keep moving, and the connection badge reports the state honestly.
 
 ## WebSocket lifecycle
 

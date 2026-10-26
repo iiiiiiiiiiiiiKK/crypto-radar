@@ -188,6 +188,35 @@ export class FuturesMarketAdapter implements MarketAdapter {
     }));
   }
 
+  /**
+   * Funding rate, mark price and index price for every perpetual contract.
+   * Binance returns them in one payload, so the whole table is enriched with
+   * a single request.
+   */
+  async listExtras(): Promise<Map<string, Partial<MarketTicker>>> {
+    const result = new Map<string, Partial<MarketTicker>>();
+    try {
+      const raw = await fetchJson({
+        market: "futures",
+        path: "/fapi/v1/premiumIndex",
+      });
+      const rows = Array.isArray(raw) ? raw : [raw];
+      for (const row of rows) {
+        const parsed = premiumIndexSchema.safeParse(row);
+        if (!parsed.success) continue;
+        result.set(parsed.data.symbol, {
+          markPrice: num(parsed.data.markPrice),
+          indexPrice: num(parsed.data.indexPrice),
+          fundingRate: num(parsed.data.lastFundingRate),
+          nextFundingTime: parsed.data.nextFundingTime ?? null,
+        });
+      }
+    } catch {
+      // Funding data is optional — the ticker keeps working without it.
+    }
+    return result;
+  }
+
   /** Funding rate + mark price + open interest live on dedicated endpoints. */
   async fetchExtras(id: string): Promise<Partial<MarketTicker>> {
     const result: Partial<MarketTicker> = {};

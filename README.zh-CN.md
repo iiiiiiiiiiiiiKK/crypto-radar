@@ -117,6 +117,26 @@ npm run dev
 由于 GitHub Pages 没有 SPA 回退机制，仓库内附带 `404.html`，用于恢复 `/crypto-radar/spot`
 这类深层链接。
 
+### 边缘代理（可选）
+
+部分网络无法直连 Binance 合约接口：出口 IP 被限流（HTTP 418/429），或 WebSocket 升级被拦截。
+仓库内置了一个 **Cloudflare Worker**，把固定的市场相关路径转发到 Binance：
+
+```bash
+cd worker
+npm install
+npx wrangler deploy
+```
+
+然后让前端指向它：
+
+```bash
+VITE_PROXY_BASE=https://<your-worker>.workers.dev npm run build
+```
+
+该代理**不是**开放代理：上游域名与路径前缀均来自白名单，未知路由返回 `404`，
+不在 Binance 官方 API 范围内的路径返回 `400`。
+
 ### 部署到其他平台
 
 ```bash
