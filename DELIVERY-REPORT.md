@@ -1,0 +1,188 @@
+# Crypto Radar — Delivery Report
+
+**Date:** 2026-10-27
+**Repository:** https://github.com/iiiiiiiiiiiiiKK/crypto-radar
+**Live site:** https://iiiiiiiiiiiiiKK.github.io/crypto-radar/
+
+## 1. Project
+
+| Item | Value |
+| --- | --- |
+| Name | Crypto Radar |
+| Repository | https://github.com/iiiiiiiiiiiiiKK/crypto-radar |
+| Live URL | https://iiiiiiiiiiiiiKK.github.io/crypto-radar/ |
+| Deployment | GitHub Pages (Actions build, branch `main`) |
+| License | MIT |
+| Stack | React 18 · TypeScript 5 · Vite 6 · Tailwind CSS 3 · Zustand 5 · Lightweight Charts 4 · TanStack Virtual · Zod · Vitest · Playwright |
+| Edge proxy | Cloudflare Worker — https://crypto-radar-proxy.changyuansex.workers.dev (optional) |
+
+## 2. Feature status
+
+### Completed and verified against the live API
+
+- **Market overview** — one virtualised table for spot, perpetuals and Alpha.
+  Search, column sorting, column show/hide, column reordering, three row
+  densities and a quote-asset filter. Price changes flash green/red.
+- **Live prices** — one shared WebSocket per market (`!miniTicker@arr`), 250 ms
+  batched updates, exponential backoff with jitter, automatic resubscribe,
+  honest connection state (Connecting / Live / Reconnecting / Delayed / Error).
+- **Perpetual data** — mark price, funding rate, index price and the next
+  funding time are read from the dedicated futures endpoints for **all**
+  contracts in one request. Never substituted with spot data.
+- **Alpha tokens** — the public token-list endpoint returns 685 tokens with
+  price, 24 h change, volume, market cap, liquidity and chain metadata.
+- **Candlestick chart** — Lightweight Charts with volume, 15 intervals, paged
+  history, crosshair OHLC readout, price line and the last candle updating
+  live.
+- **Indicators** — MA, EMA, RSI and MACD, each toggleable, rendered on the
+  chart without a page reload.
+- **Watchlists** — multiple named lists, add/remove/rename/reorder, persisted
+  in `localStorage`, corrupted values discarded instead of crashing.
+- **Screener** — scans all three markets at once, virtualised result table,
+  six rule templates plus a custom rule set, market and watchlist filters.
+- **Bilingual UI** — complete Chinese and English dictionaries, persisted.
+- **Keyboard shortcuts** — `/`, `Esc`, `1`/`2`/`3`, ignored while typing.
+- **Responsive layout** — dedicated mobile navigation and layout, no
+  horizontal overflow.
+- **GitHub Pages SPA fallback** — `public/404.html` restores deep links.
+
+### Partially completed
+
+- **Alpha candlestick chart** — Binance publishes no public kline endpoint for
+  Alpha tokens. The page states this explicitly instead of drawing synthetic
+  candles. The Alpha market itself (list, prices, 24 h statistics, search,
+  sorting, watchlists, screener) is complete.
+- **Live perpetual WebSocket** — the futures stream (`fstream.binance.com`)
+  is blocked on the networks tested. The feed therefore falls back to a light
+  REST poll (`/fapi/v1/ticker/price`) after 20 s without a frame, so the
+  prices keep moving and the badge reports the state honestly.
+
+### Not implemented (deliberately)
+
+- **Trading** — out of scope by design. The project never asks for an API key
+  and cannot place an order.
+- **Push notifications** — the screener is structured so a notification
+  service can be added, but no Telegram/email/web-push integration ships.
+- **Account system** — watchlists and preferences stay in the browser. The
+  storage layer is an interface so a server-side store can replace it.
+
+## 3. Test results
+
+All results below come from actual runs in this environment.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Type check | `npm run typecheck` | pass (0 errors) |
+| Lint | `npm run lint` | pass (0 errors, 0 warnings) |
+| Unit tests | `npm run test` | **62 passed / 62** (9 files) |
+| Production build | `npm run build` | pass — `index.js` 163 kB, `charts` 163 kB, `table` 177 kB (gzip 46/52/56 kB) |
+| E2E desktop | `npm run test:e2e -- --project=desktop-chrome` | **9 passed / 9** |
+| E2E mobile | `npm run test:e2e -- --project=mobile-chrome` | **9 passed / 9** |
+| Live site check | `npm run verify:live` | all pages return live rows, screener 42 hits, chart renders, 0 console errors |
+| GitHub Actions CI | push to `main` | success |
+| GitHub Pages deploy | push to `main` | success |
+
+### What the E2E suite covers (live Binance API, no mocks)
+
+1. The overview renders live market rows and the connection badge reports a
+   sane state.
+2. Search filters the table down to the matching pairs.
+3. Sorting by 24 h change reorders the table.
+4. The watchlist star survives a page reload.
+5. The chart page draws candles and the indicators can be toggled.
+6. The perpetual table shows contracts and a real funding rate.
+7. The screener filters on real data across all markets.
+8. The language toggle switches the interface and persists.
+9. The mobile layout has no horizontal overflow.
+
+### What the unit suite covers
+
+Price/percentage/precision formatting, tick-size → decimal derivation,
+symbol splitting, quote-asset filtering, MA/EMA/RSI/MACD maths, MACD alignment,
+K-line sorting and de-duplication, screener rules (gainers, losers, volume,
+funding, spike, market and watchlist filters), watchlist and settings
+persistence, corrupted-storage recovery, WebSocket subscribe/unsubscribe/
+dispatch/reconnect, the bilingual dictionary and its structural parity.
+
+## 4. Infrastructure
+
+| Item | Status |
+| --- | --- |
+| GitHub repository | public, `main` branch, CI + deploy workflows |
+| GitHub Pages | live at https://iiiiiiiiiiiiiKK.github.io/crypto-radar/ |
+| Edge proxy (Cloudflare Worker) | deployed, optional, `VITE_PROXY_BASE` |
+| Database | none — all data is public market data |
+| Cron jobs | none required |
+| R2 bucket | not used by this project |
+
+### Environment variables (names only — no values)
+
+`VITE_PROXY_BASE`, `VITE_SPOT_REST_BASE`, `VITE_SPOT_WS_BASE`,
+`VITE_FUTURES_REST_BASE`, `VITE_FUTURES_WS_BASE`, `VITE_ALPHA_REST_BASE`,
+`VITE_ALPHA_POLL_MS`, `VITE_BASE_PATH` (build time).
+
+### Quotas and cost
+
+- GitHub Pages: free for public repositories, bandwidth included.
+- Cloudflare Workers free tier: 100 000 requests/day — far above the usage of
+  a monitoring terminal.
+- Binance public API: no key, no quota purchase; the documented rate limits
+  (6000 request weight/min for spot, 2400/min for futures) apply. The client
+  rotates hosts and backs off on HTTP 418/429.
+
+## 5. Security review
+
+| Area | Result |
+| --- | --- |
+| Secrets in the repository | none — the tree was scanned for token patterns before the first push |
+| API keys / private keys | none — the project never asks for one |
+| Open proxy | the edge proxy only forwards whitelisted market paths; unknown routes return 404, non-Binance paths return 400 |
+| SSRF | impossible by construction — the upstream origin comes from a fixed list |
+| Input validation | every API response is parsed with Zod before it reaches the UI |
+| XSS | React escapes by default; no `dangerouslySetInnerHTML` anywhere |
+| Local storage | all reads are wrapped so corrupted data cannot crash the app |
+| Secrets in logs | the worker logs nothing |
+| Destructive actions | none — the app is read-only |
+
+**Credential hygiene note:** the GitHub, Cloudflare, Vercel and R2 credentials
+supplied for this task were used through the environment only. None of them
+were written into the repository, the build output or the deployed site. They
+should still be rotated by the owner as a precaution, since they were shared
+in plain text.
+
+## 6. Known limitations and risks
+
+1. **Alpha has no candlestick chart** — a Binance API limitation, stated in
+   the UI.
+2. **The futures WebSocket is blocked on some networks** — the app falls
+   back to polling and says so.
+3. **Binance rate limits aggressive clients** — HTTP 418/429 is common on
+   shared IPs; the client rotates hosts and the edge proxy can be used.
+4. **The screener's short-window rule uses the 24 h open price** — Binance
+   does not publish a free short-interval change field for every symbol, so
+   the rule is computed from `(last − open) / open` and labelled as such.
+5. **The app is read-only** — it cannot place orders and must never be
+   extended to do so without a separate security review.
+
+## 7. Final status
+
+**The project meets the release criteria.**
+
+- Core features are implemented and verified against the live Binance API.
+- The production build succeeds.
+- 62 unit tests and 18 end-to-end runs (9 desktop + 9 mobile) pass.
+- The important failure paths are handled and were exercised (HTTP 418,
+  malformed payloads, corrupted storage, missing WebSocket).
+- The security measures above are in place.
+- The GitHub repository is public and the code is pushed.
+- README (English + Chinese), LICENSE, `.env.example`, CI and deploy
+  workflows are committed.
+- The site is deployed and the production build was verified in a browser.
+
+**Not complete / blocked:**
+
+- Alpha candlestick charts — blocked by Binance (no public kline endpoint).
+- Perpetual live WebSocket on networks that block `fstream.binance.com` —
+  mitigated with a REST poll.
+
+Both limitations are disclosed in the UI and in the README.
