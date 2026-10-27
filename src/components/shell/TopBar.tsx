@@ -6,6 +6,10 @@ import { useUi } from "@/stores/ui";
 import { ConnectionPill } from "./ConnectionPill";
 import { GlobalSearch } from "./GlobalSearch";
 
+/** The author's X profile, shown in the top bar of every page. */
+export const AUTHOR_X_URL = "https://x.com/0xkillcoin";
+export const AUTHOR_X_HANDLE = "@0xkillcoin";
+
 export function TopBar() {
   const now = useNow(1000);
   const setHotkeysOpen = useUi((state) => state.setHotkeysOpen);
@@ -35,9 +39,23 @@ export function TopBar() {
           <span className="clock__t">{local}</span>
           <span className="clock__z">UTC {utc} · CST</span>
         </div>
+        <a
+          className="social"
+          href={AUTHOR_X_URL}
+          target="_blank"
+          rel="me noopener noreferrer"
+          title={`作者 X：${AUTHOR_X_HANDLE}`}
+          aria-label={`在 X 上关注作者 ${AUTHOR_X_HANDLE}`}
+          data-testid="author-x"
+        >
+          <span className="social__glyph" aria-hidden="true">
+            𝕏
+          </span>
+          <span className="social__handle">{AUTHOR_X_HANDLE}</span>
+        </a>
         <button
           type="button"
-          className="btn btn--icon btn--ghost"
+          className="btn btn--icon btn--ghost topbar__hotkeys"
           title="快捷键说明 (?)"
           aria-label="快捷键说明"
           onClick={() => setHotkeysOpen(true)}

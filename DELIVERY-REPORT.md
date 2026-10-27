@@ -99,9 +99,9 @@ npm run build       -> 通过，产物 index 256.8kB(gzip 76.4) + charts 162.6kB
 | `movers-search.test.ts` | 榜单排序与过滤、搜索打分与计价货币偏好 |
 | `storage-parsers.test.ts` | 本地存储命名空间/容错、WS 帧解析（miniTicker/markPrice/kline） |
 
-### 5.3 浏览器端真实流程（`npm run e2e`，21/21 通过）
+### 5.3 浏览器端真实流程（`npm run e2e`，22/22 通过）
 
-对真实币安行情执行 21 条流程：
+对真实币安行情执行 22 条流程：
 
 | 流程 | 结果 |
 | --- | --- |
@@ -125,6 +125,7 @@ npm run build       -> 通过，产物 index 256.8kB(gzip 76.4) + charts 162.6kB
 | 自选拖拽排序（BETAUSDT/VIBUSDT → VIBUSDT/BETAUSDT） | 通过 |
 | 价格提醒在页面内触发（右下角 toast，含当前价） | 通过 |
 | 390px 六条路由 0 横向溢出、底部导航出现、侧栏隐藏 | 通过 |
+| 作者 X 链接（7 个页面均指向 https://x.com/0xkillcoin，target=_blank + rel=noopener，命中区 ≥30px） | 通过 |
 | 全流程控制台 0 错误 | 通过 |
 
 ### 5.4 布局审计（5 视口 × 7 页面，`npm run audit:layout`）
@@ -136,6 +137,34 @@ npm run build       -> 通过，产物 index 256.8kB(gzip 76.4) + charts 162.6kB
 * 首行行情到达时间实测 1.55s（冷启动，含 1.5MB 24h 快照解析）。
 * 文本对比度（桌面实测）：标题 17.9:1、正文 8.8:1、表格数字 17:1、情绪标题 13.9:1、
   10px 小标签 5.6–5.9:1 —— 均高于 WCAG AA（4.5:1）。
+
+### 5.4b iPhone 专项审计（`npm run audit:mobile`，WebKit）
+
+在 WebKit（真实 iOS 引擎）下跑 iPhone SE 375×667 / iPhone 13 390×844 / iPhone 15 Pro Max 430×932，
+每机型 7 个页面，检查横向溢出、iOS 输入缩放、触控目标尺寸、底部固定栏：
+
+| 检查项 | 修复前 | 修复后 |
+| --- | --- | --- |
+| 横向溢出 | 0（原本合格） | 0 |
+| 字号 < 16px 的输入框（iOS 聚焦会放大整页） | 每页 1–8 个 | **0** |
+| 触控目标 < 40px | 每页 5–34 个 | **0**（TradingView 署名链接由库决定尺寸，已显式豁免） |
+| 控制台错误 | 0 | 0 |
+
+修复过程中发现并解决的真实缺陷（均有实测数据，不是推测）：
+
+1. **`/settings` 在手机上每列塌成 21px**：`.settings` 是 12 列栅格，`.col-6` 在移动端只 span 1 列。
+   改为移动端单列，行内 label/control 上下堆叠。
+2. **筛选抽屉底边跑到屏幕外 35px**（`bottom 879 > 视口 844`）：`.page` 入场动画用 `animation-fill-mode: both`
+   留下 `transform: matrix(1,0,0,1,0,0)`，而任何非 `none` 的 transform 都会成为 `position: fixed` 的包含块。
+   改为 `backwards`，并让 `Modal` 通过 `createPortal` 挂到 `<body>`，彻底不受祖先影响。
+3. **首页整页高 4892px**：异动流在手机上 `max-height: none`，40 条事件全部展开。改为 62dvh 内滚
+   （雷达结果同理 66dvh），首页降到 2424px。
+4. **行情页工具条 5 行 235px**：报价 / 涨跌 / 成交额 / 列 / 行高挤在一行。手机上收进「筛选」底部抽屉，
+   工具条降到 2 行 101px。
+5. **首屏被 SITREP 占满**（三张竖排卡片 557px）：改为「情绪整行 + 基准/覆盖并排」两行结构，
+   并在手机上隐藏跑马灯，异动流顶部 782px → **604px**。
+6. **iOS 输入自动放大**：搜索框/输入框/下拉均为 12px，聚焦即放大整页。移动端统一 16px。
+7. **触控目标过小**：顶栏图标 30px、分段控件 24px、筛选 chip 22px、星标 20px。移动端统一 40–44px。
 
 ### 5.5 数据真实性抽查
 

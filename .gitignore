@@ -28,3 +28,7 @@ flows-report.json
 audit-out.txt
 docs/screenshots/*.png
 audit-final.txt
+mobile-audit.txt
+audit-report.json
+mobile-audit.json
+desktop-audit.txt

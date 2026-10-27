@@ -6,6 +6,8 @@
 Crypto Radar 是一个真实可用的加密市场作战室：币安现货与 USDⓈ-M 永续的实时行情、
 可用的 K 线与技术指标、规则驱动的异动雷达、个人自选工作台，以及把真实行情变成分享图的 Meme Studio。
 
+作者 X（Twitter）：**[𝕏 @0xkillcoin](https://x.com/0xkillcoin)** —— 顶栏的 𝕏 按钮指向这里。
+
 > 数据全部来自交易所官方公开接口，不需要 API Key。
 > 缺失的数据会显示为“数据不足 / 不可用”，**永远不会被填成 0 或随机数**。
 
@@ -29,10 +31,11 @@ npm run test          # vitest：指标 / 规则 / 引擎 / 解析 / 存储
 npm run verify        # 上面三步 + 生产构建
 npm run e2e           # 对真实行情的浏览器流程测试（需先 npm run preview）
 npm run audit:layout  # 5 种视口 × 7 个页面的布局与对比度审计 + 截图
+npm run audit:mobile  # iPhone（WebKit）三机型：溢出 / 输入缩放 / 触控目标审计
 ```
 
-`npm run e2e` 与 `npm run audit:layout` 需要先启动预览服务，并且默认访问
-`http://127.0.0.1:4174/crypto-radar`（可用 `BASE_URL` 覆盖）。
+`npm run e2e`、`npm run audit:layout` 与 `npm run audit:mobile` 需要先启动预览服务，
+默认访问 `http://127.0.0.1:4174/crypto-radar`（可用 `BASE_URL` 覆盖）。
 
 ---
 
@@ -109,6 +112,23 @@ src/
 * **断线自愈**：指数退避重连、订阅恢复、心跳检测、重连后重置历史窗口避免“假跳变”。
 
 更多细节见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)、[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)。
+
+### 移动端（iPhone）
+
+`src/styles/mobile.css` 是独立的移动层，在桌面样式之后加载。它不是「缩小版桌面」，而是按 iPhone 实测重排：
+
+* **输入不放大**：iOS 在聚焦小于 16px 的输入框时会把整页放大，移动端所有 input/select 固定 16px。
+* **触控目标**：按钮、分段控件、筛选 chip、星标、开关都提到 40–44px；`touch-action: manipulation` 去掉双击延迟。
+* **安全区**：底栏高度 = 58px + `env(safe-area-inset-bottom)`，页面预留同样的底部内边距，最后一块面板不会被挡住。
+* **首屏**：跑马灯在手机上隐藏，SITREP 由三张竖排卡片改成「情绪整行 + 基准/覆盖并排」，
+  异动流从屏幕第 782px 提到第 604px（iPhone 13 上首屏即可看到异动）。
+* **行情表**：桌面工具条（报价/涨跌/成交额/列/行高）在手机上收进「筛选」底部抽屉，工具条从 5 行 235px 降到 2 行 101px。
+* **弹层与搜索**：Modal 通过 `createPortal` 挂到 `<body>`（避免父级 transform 改变 `position: fixed` 的包含块），
+  底部抽屉完整落在视口内；搜索下拉最多占 58dvh。
+* **图表**：周期栏与指标栏改为单行横向滚动，副图按需隐藏，图表高度随 `dvh` 变化。
+* **横屏**：`max-height: 480px` 时隐藏跑马灯、压缩底栏，把垂直空间还给图表。
+
+实测（WebKit，iPhone SE / 13 / 15 Pro Max × 7 个页面）：横向溢出 0、输入缩放 0、控制台错误 0。
 
 ---
 

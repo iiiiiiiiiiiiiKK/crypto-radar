@@ -75,7 +75,7 @@ export function Sitrep() {
       <div className="sitrep__rings" aria-hidden="true" />
       <div className="sitrep__sweep" aria-hidden="true" />
 
-      <div className="sitrep__cell">
+      <div className="sitrep__cell sitrep__cell--mood">
         <div className="sitrep__eyebrow">
           <span className="dot dot--live" />
           MARKET MOOD · 规则化市场状态
@@ -109,7 +109,7 @@ export function Sitrep() {
         </div>
       </div>
 
-      <div className="sitrep__cell">
+      <div className="sitrep__cell sitrep__cell--bench">
         <div className="sitrep__eyebrow">
           <Icon name="waves" size={11} /> BENCHMARK · 实时价格
         </div>

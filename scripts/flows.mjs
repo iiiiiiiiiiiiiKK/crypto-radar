@@ -363,6 +363,26 @@ await flow("chart-loads-500-bars", async () => {
   return { bars, canvases: info.canvases, legend: info.legend };
 });
 
+await flow("author-x-link", async () => {
+  const results = [];
+  for (const route of ["/", "/markets", "/radar", "/charts", "/studio", "/watchlist", "/settings"]) {
+    await page.goto(`${BASE}${route}`, { waitUntil: "domcontentloaded" });
+    await page.waitForTimeout(900);
+    const link = page.locator('[data-testid="author-x"]');
+    await link.waitFor({ state: "visible", timeout: 8000 });
+    const href = await link.getAttribute("href");
+    const target = await link.getAttribute("target");
+    const rel = await link.getAttribute("rel");
+    const box = await link.boundingBox();
+    if (href !== "https://x.com/0xkillcoin") throw new Error(`${route}: href=${href}`);
+    if (target !== "_blank") throw new Error(`${route}: target=${target}`);
+    if (!rel?.includes("noopener")) throw new Error(`${route}: rel=${rel}`);
+    if (!box || box.height < 30) throw new Error(`${route}: hit area ${JSON.stringify(box)}`);
+    results.push({ route, h: Math.round(box.height) });
+  }
+  return results.map((item) => `${item.route}:${item.h}px`).join(" ");
+});
+
 await flow("no-console-errors", async () => {
   if (errors.length > 0) throw new Error(errors.slice(0, 5).join(" | "));
   return "clean";

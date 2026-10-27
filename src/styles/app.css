@@ -219,6 +219,49 @@
   color: var(--ink-4);
 }
 
+/* --- author X link -------------------------------------------------------- */
+.social {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 10px 0 8px;
+  color: var(--ink-2);
+  border: 1px solid var(--line-2);
+  background: #0a0f14;
+  transition: color 0.15s var(--ease), border-color 0.15s var(--ease),
+    background 0.15s var(--ease);
+  text-decoration: none;
+}
+
+.social:hover {
+  color: var(--ink);
+  border-color: var(--line-3);
+  background: #0e151c;
+  text-decoration: none;
+}
+
+.social__glyph {
+  font-family: var(--font-display);
+  font-size: 14px;
+  line-height: 1;
+  color: var(--ink);
+  /* Mathematical double-struck X — renders as the X logo mark on every
+     platform without shipping a trademarked image asset. */
+  letter-spacing: 0;
+}
+
+.social:hover .social__glyph {
+  color: var(--up);
+}
+
+.social__handle {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
 /* --- search --------------------------------------------------------------- */
 .search {
   position: relative;
@@ -414,7 +457,10 @@
   display: flex;
   flex-direction: column;
   gap: var(--gap);
-  animation: cr-fade-up 0.28s var(--ease) both;
+  /* `backwards` (not `both`): a filled-forward transform, even an identity
+     matrix, makes this element a containing block for position:fixed children
+     and breaks modals/sheets. */
+  animation: cr-fade-up 0.28s var(--ease) backwards;
 }
 
 .page__head {
@@ -1758,6 +1804,43 @@ select.select {
 
 .toolbar__spacer {
   margin-left: auto;
+}
+
+.toolbar__desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+/* Phone only: replaced by the filter sheet. */
+.toolbar__filters {
+  display: none;
+}
+
+.toolbar__badge {
+  display: inline-block;
+}
+
+.filterform {
+  display: grid;
+  gap: 12px;
+}
+
+.colpick {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.colpick__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-2);
 }
 
 /* --- popover / drawer ----------------------------------------------------- */

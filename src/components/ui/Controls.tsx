@@ -1,4 +1,5 @@
 import { useEffect, useRef, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Icon, type IconName } from "@/components/Icons";
 import { useWatchlist } from "@/stores/watchlist";
 import type { MarketId } from "@/types/market";
@@ -152,9 +153,23 @@ export function Modal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
+  // Lock the page behind the sheet so a phone cannot scroll the table while the
+  // dialog is open.
+  useEffect(() => {
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [open]);
+
   if (!open) return null;
 
-  return (
+  // Rendered into <body>: any transformed/filtered ancestor (page entrance
+  // animation, panel hover transform) would otherwise become the containing
+  // block for this fixed layer and push the sheet off screen.
+  return createPortal(
     <div
       className="modal__scrim"
       ref={scrim}
@@ -170,7 +185,8 @@ export function Modal({
         <div className="modal__body">{children}</div>
         {footer ? <footer className="modal__foot">{footer}</footer> : null}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
