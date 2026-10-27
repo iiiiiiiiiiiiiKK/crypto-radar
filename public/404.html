@@ -2,36 +2,42 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <title>Crypto Radar</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Crypto Radar · 正在重定向</title>
     <style>
-      html,
       body {
         margin: 0;
-        height: 100%;
-        background: #080d0c;
-        color: #8fa29a;
-        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #06080b;
+        color: #edf3f9;
+        font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+      }
+      a {
+        color: #00f5a0;
       }
       .box {
         text-align: center;
+        padding: 32px;
       }
-      .mark {
-        color: #b8f36b;
-        font-size: 28px;
-        letter-spacing: 0.08em;
+      .tag {
+        font-family: Consolas, monospace;
+        font-size: 10px;
+        letter-spacing: 0.24em;
+        color: #6a7a88;
+        text-transform: uppercase;
       }
     </style>
     <script>
-      // Remember the requested deep link and hand over to index.html.
+      // GitHub Pages has no SPA fallback: remember the requested path, then
+      // bounce to the app root which restores it from sessionStorage.
       (function () {
+        var path = window.location.pathname + window.location.search + window.location.hash;
         try {
-          sessionStorage.setItem("crypto-radar:redirect", window.location.href);
+          sessionStorage.setItem("crypto-radar:redirect", path);
         } catch (error) {
-          /* ignore */
+          /* storage disabled — fall through to the plain redirect */
         }
         window.location.replace("/crypto-radar/");
       })();
@@ -39,8 +45,8 @@
   </head>
   <body>
     <div class="box">
-      <div class="mark">◎ CRYPTO RADAR</div>
-      <p>Loading the terminal…</p>
+      <div class="tag">CRYPTO RADAR · 404</div>
+      <p>正在返回 Crypto Radar… 如果页面没有自动跳转，请<a href="/crypto-radar/">点击这里</a>。</p>
     </div>
   </body>
 </html>

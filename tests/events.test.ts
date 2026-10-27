@@ -1,112 +1,146 @@
 import { describe, expect, it } from "vitest";
-import { EventStore, DEFAULT_THRESHOLDS, detectEvents } from "@/features/events/rules";
-import type { MarketTicker } from "@/types/market";
+import {
+  DEFAULT_EVENT_THRESHOLDS,
+  EventLog,
+  RULE_GLYPH,
+  RULE_TITLES,
+  detectEvents,
+} from "@/engine/events";
+import { makeRow } from "./helpers";
 
-function ticker(partial: Partial<MarketTicker>): MarketTicker {
-  return {
-    market: "spot",
-    symbol: "BTCUSDT",
-    id: "BTCUSDT",
-    base: "BTC",
-    quote: "USDT",
-    price: 100,
-    priceChangePercent: 0,
-    openPrice: 100,
-    high24h: 110,
-    low24h: 90,
-    volume24h: 1,
-    quoteVolume24h: 1000,
-    trades24h: 1,
-    bidPrice: null,
-    askPrice: null,
-    markPrice: null,
-    indexPrice: null,
-    fundingRate: null,
-    nextFundingTime: null,
-    openInterest: null,
-    decimals: 2,
-    updatedAt: 1,
-    listingTime: null,
-    ...partial,
-  };
-}
-
-function baseContext(now: number) {
-  return {
-    market: "spot" as const,
-    thresholds: DEFAULT_THRESHOLDS,
-    previous: new Map<string, { price: number; at: number }>(),
-    isCoolingDown: () => false,
-    now,
-  };
-}
+const now = 1_700_000_000_000;
+const ctx = (overrides: Partial<Parameters<typeof detectEvents>[1]> = {}) => ({
+  thresholds: DEFAULT_EVENT_THRESHOLDS,
+  now,
+  isCoolingDown: () => false,
+  ...overrides,
+});
 
 describe("detectEvents", () => {
-  it("fires a 24 h surge past the threshold", () => {
-    const now = 1_000_000;
-    const events = detectEvents([ticker({ priceChangePercent: 12 })], baseContext(now));
-    expect(events.some((event) => event.ruleId === "surge")).toBe(true);
-    expect(events[0].value).toBeGreaterThanOrEqual(8);
+  it("fires a 5 minute pump above the threshold", () => {
+    const row = makeRow({
+      d: { ...makeRow().d, m5: 4.2, turnoverPerMin: 50_000, volumeSurge: 2.4 },
+    });
+    const events = detectEvents([row], ctx());
+    const pump = events.find((event) => event.ruleId === "pump-5m");
+    expect(pump).toBeDefined();
+    expect(pump?.why).toContain("4.20%");
+    expect(pump?.tone).toBe("up");
   });
 
-  it("fires a dump for a negative move", () => {
-    const events = detectEvents([ticker({ priceChangePercent: -12 })], baseContext(2_000_000));
-    expect(events.some((event) => event.ruleId === "dump")).toBe(true);
+  it("does not fire below the threshold", () => {
+    const row = makeRow({ d: { ...makeRow().d, m5: 1.1, m1: 0.2 } });
+    expect(detectEvents([row], ctx())).toHaveLength(0);
   });
 
-  it("detects a short burst between two samples", () => {
-    const context = baseContext(1_100_000);
-    context.previous.set("BTCUSDT", { price: 100, at: 1_090_000 });
-    const events = detectEvents([ticker({ price: 103 })], context);
-    const burst = events.find((event) => event.ruleId === "surge" && event.value < 5);
-    expect(burst).toBeDefined();
+  it("ignores rows that are not fresh", () => {
+    const row = makeRow({
+      receivedAt: now - 120_000,
+      d: { ...makeRow().d, m5: 9 },
+    });
+    expect(detectEvents([row], ctx())).toHaveLength(0);
   });
 
-  it("stays silent when nothing crosses a threshold", () => {
-    const events = detectEvents(
-      [ticker({ priceChangePercent: 0.4, high24h: 200, low24h: 50 })],
-      baseContext(3_000_000),
-    );
+  it("ignores illiquid pairs", () => {
+    const row = makeRow({
+      quoteVolume24h: 1_000,
+      d: { ...makeRow().d, m5: 9 },
+    });
+    expect(detectEvents([row], ctx())).toHaveLength(0);
+  });
+
+  it("respects the cooldown callback", () => {
+    const row = makeRow({ d: { ...makeRow().d, m5: 9 } });
+    const events = detectEvents([row], ctx({ isCoolingDown: () => true }));
     expect(events).toHaveLength(0);
   });
 
-  it("fires on an extreme funding rate", () => {
-    const events = detectEvents(
-      [ticker({ fundingRate: 0.002, high24h: 200, low24h: 50 })],
-      baseContext(4_000_000),
+  it("fires a volume burst with the measured ratio", () => {
+    const row = makeRow({
+      d: { ...makeRow().d, volumeSurge: 4.5, turnoverPerMin: 80_000 },
+    });
+    const burst = detectEvents([row], ctx()).find((event) => event.ruleId === "volume-burst");
+    expect(burst?.why).toContain("4.50×");
+  });
+
+  it("fires a funding extreme only for perpetuals with a rate", () => {
+    const perp = makeRow({
+      market: "futures",
+      symbol: "BTCUSDT",
+      fundingRate: 0.0008,
+      markPrice: 100.2,
+      d: { ...makeRow().d },
+    });
+    const events = detectEvents([perp], ctx());
+    const funding = events.find((event) => event.ruleId === "funding-extreme");
+    expect(funding).toBeDefined();
+    expect(funding?.chips.length).toBeGreaterThan(0);
+    expect(funding?.why).toContain("多头付费");
+  });
+
+  it("fires open interest changes once the delta exists", () => {
+    const perp = makeRow({
+      market: "futures",
+      openInterest: 1_200_000,
+      d: { ...makeRow().d, oiChange: -7.5 },
+    });
+    const oi = detectEvents([perp], ctx()).find((event) => event.ruleId === "oi-jump");
+    expect(oi?.tone).toBe("down");
+    expect(oi?.why).toContain("7.50%");
+  });
+
+  it("detects price up with shrinking volume", () => {
+    const row = makeRow({ d: { ...makeRow().d, m15: 3, volumeSurge: 0.4 } });
+    const divergence = detectEvents([row], ctx()).find(
+      (event) => event.ruleId === "divergence-up",
     );
-    expect(events.some((event) => event.ruleId === "funding-extreme")).toBe(true);
+    expect(divergence?.severity).toBe("warn");
   });
 
-  it("respects the cooldown", () => {
-    const context = baseContext(5_000_000);
-    context.isCoolingDown = () => true;
-    const events = detectEvents([ticker({ priceChangePercent: 20 })], context);
-    expect(events).toHaveLength(0);
+  it("caps the number of events per pass", () => {
+    const rows = Array.from({ length: 60 }, (_, index) =>
+      makeRow({
+        symbol: `T${index}USDT`,
+        key: `spot:T${index}USDT`,
+        d: { ...makeRow().d, m5: 8, volumeSurge: 6, turnoverPerMin: 90_000 },
+      }),
+    );
+    expect(detectEvents(rows, ctx()).length).toBeLessThanOrEqual(
+      DEFAULT_EVENT_THRESHOLDS.maxPerTick,
+    );
   });
 
-  it("assigns a higher severity to a bigger move", () => {
-    const small = detectEvents([ticker({ priceChangePercent: 9 })], baseContext(6_000_000));
-    const large = detectEvents([ticker({ priceChangePercent: 30 })], baseContext(7_000_000));
-    expect(small[0].severity).toBe("info");
-    expect(large[0].severity).toBe("critical");
+  it("ships a title and glyph for every rule", () => {
+    expect(Object.keys(RULE_TITLES)).toHaveLength(Object.keys(RULE_GLYPH).length);
   });
 });
 
-describe("EventStore", () => {
-  it("caps the feed and tracks cooldowns", () => {
-    const store = new EventStore(2);
-    const now = 10_000_000;
-    store.push(
-      detectEvents([ticker({ priceChangePercent: 20 })], {
-        ...baseContext(now),
-        isCoolingDown: (rule, symbol, at) => store.isCoolingDown(rule, symbol, at),
-      }),
+describe("EventLog", () => {
+  it("de-duplicates identical event ids", () => {
+    const log = new EventLog();
+    const row = makeRow({ d: { ...makeRow().d, m5: 9 } });
+    const events = detectEvents([row], ctx());
+    log.push(events);
+    const firstCount = log.all.length;
+    expect(firstCount).toBeGreaterThan(0);
+    log.push(events);
+    expect(log.all.length).toBe(firstCount);
+  });
+
+  it("starts cooling down after a push", () => {
+    const log = new EventLog();
+    const row = makeRow({ d: { ...makeRow().d, m5: 9 } });
+    log.push(detectEvents([row], ctx()));
+    expect(log.isCoolingDown("pump-5m", row.key, now + 1_000)).toBe(true);
+    expect(log.isCoolingDown("pump-5m", row.key, now + DEFAULT_EVENT_THRESHOLDS.cooldownMs + 1)).toBe(
+      false,
     );
-    expect(store.all.length).toBeGreaterThan(0);
-    expect(store.isCoolingDown("surge", "BTCUSDT", now + 1000)).toBe(true);
-    expect(store.isCoolingDown("surge", "BTCUSDT", now + DEFAULT_THRESHOLDS.cooldownMs + 1)).toBe(false);
-    store.clear();
-    expect(store.all).toHaveLength(0);
+  });
+
+  it("clears everything", () => {
+    const log = new EventLog();
+    log.push(detectEvents([makeRow({ d: { ...makeRow().d, m5: 9 } })], ctx()));
+    log.clear();
+    expect(log.all).toHaveLength(0);
   });
 });

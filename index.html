@@ -1,31 +1,33 @@
 <!doctype html>
-<html lang="zh-CN" class="dark">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#06080b" />
+    <title>Crypto Radar · The Meme-Powered Crypto Market Command Center</title>
     <meta
       name="description"
-      content="Crypto Radar — real-time crypto market terminal for Binance spot, USDⓈ-M perpetuals and Alpha tokens: live tickers, candlestick charts, technical indicators, watchlists and an anomaly screener."
+      content="Crypto Radar 2.0 — 币安现货 / U 本位永续 / Alpha 实时行情作战室：实时价格、K 线与技术指标、市场异动雷达、自选工作台、行情 Meme 卡片。全部数据来自交易所官方公开接口。"
     />
-    <meta property="og:title" content="Crypto Radar — Real-time Crypto Market Terminal" />
+    <meta property="og:title" content="Crypto Radar · Meme-Powered Crypto Market Command Center" />
     <meta
       property="og:description"
-      content="Professional real-time market terminal: Binance spot, perpetual futures and Alpha tokens with live WebSocket tickers, candlestick charts, MA/EMA/RSI/MACD, watchlists and a market screener."
+      content="真实行情 + 异动雷达 + 可用 K 线 + Meme 传播力。把整个加密市场变成一座可以实时作战的数字战场。"
     />
     <meta property="og:type" content="website" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
-    <title>Crypto Radar — 实时加密货币行情终端</title>
     <script>
-      // GitHub Pages has no SPA fallback: unknown paths are served with
-      // 404.html, which stores the target and redirects back here.
+      // GitHub Pages has no SPA fallback: unknown paths land on 404.html which
+      // stores the requested path and bounces back here.
       (function () {
         try {
           var stored = sessionStorage.getItem("crypto-radar:redirect");
           if (stored) {
             sessionStorage.removeItem("crypto-radar:redirect");
             var target = new URL(stored, window.location.origin);
-            if (target.pathname.indexOf("/crypto-radar") === 0) {
+            var prefix = window.location.pathname.replace(/[^/]*$/, "");
+            if (target.pathname.indexOf(prefix) === 0) {
               window.history.replaceState({}, "", target.pathname + target.search + target.hash);
             }
           }

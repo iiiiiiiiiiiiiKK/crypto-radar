@@ -1,9 +1,9 @@
 {
   "name": "crypto-radar",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": false,
   "type": "module",
-  "description": "Crypto Radar — professional real-time crypto market terminal (Binance spot, USDⓈ-M perpetual, Alpha tokens, klines, screener, watchlists).",
+  "description": "Crypto Radar 2.0 — the meme-powered crypto market command center: live Binance spot and USDⓈ-M perpetual data, real candlestick charts with indicators, a rule based anomaly radar, watchlists and shareable market meme cards.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -13,14 +13,14 @@
   "keywords": [
     "crypto",
     "binance",
-    "terminal",
-    "trading",
     "market-data",
-    "kline",
-    "screener",
     "realtime",
     "websocket",
-    "technical-indicators"
+    "candlestick",
+    "technical-indicators",
+    "screener",
+    "meme",
+    "terminal"
   ],
   "scripts": {
     "dev": "vite",
@@ -30,12 +30,9 @@
     "lint": "eslint . --max-warnings 0",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test",
-    "verify:live": "node scripts/verify-live.mjs",
-    "screenshots": "node scripts/capture-screenshots.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
-    "audit:layout": "node scripts/audit-layout.mjs",
-    "screenshots:mobile": "node scripts/capture-mobile.mjs"
+    "e2e": "node scripts/flows.mjs",
+    "audit:layout": "node scripts/audit.mjs",
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.10.9",

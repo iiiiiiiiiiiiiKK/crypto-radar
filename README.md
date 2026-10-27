@@ -1,329 +1,137 @@
-# <div align="center">
+# Crypto Radar 2.0
 
-# ◎ Crypto Radar
+**The Meme-Powered Crypto Market Command Center**
+**把整个加密市场变成一座可以实时作战、捕捉异动、围观行情、制造 Meme 的数字战场。**
 
-**A Meme-fuelled crypto war room.** Real Binance market data, a pixel-HUD terminal skin, a computed market mood, a game-style arena, an explainable event stream and a one-click meme card generator.
+Crypto Radar 是一个真实可用的加密市场作战室：币安现货与 USDⓈ-M 永续的实时行情、
+可用的 K 线与技术指标、规则驱动的异动雷达、个人自选工作台，以及把真实行情变成分享图的 Meme Studio。
 
-[English](README.md) · [中文](README.zh-CN.md) · [Live demo](https://iiiiiiiiiiiiiKK.github.io/crypto-radar/) · [X](https://x.com/0xkillcoin)
-
-</div>
+> 数据全部来自交易所官方公开接口，不需要 API Key。
+> 缺失的数据会显示为“数据不足 / 不可用”，**永远不会被填成 0 或随机数**。
 
 ---
 
-Crypto Radar 2.0 is a working market monitor with a personality, not a mock-up.
-Every price, volume, funding rate and candle comes from the official public
-Binance endpoints; every mood, ranking, event and card is computed from that
-same live data — nothing is generated at random.
+## 1. 快速开始
 
-The redesign keeps the professional core (real feeds, real candles, real
-indicators) and rebuilds the presentation around three ideas:
+```bash
+npm ci            # 安装依赖（Node >= 20）
+npm run dev       # 开发服务器 http://localhost:5173/crypto-radar/
+npm run build     # 生产构建 -> dist/
+npm run preview   # 预览构建产物 http://localhost:4173/crypto-radar/
+```
 
-1. **The market has a mood** — a computed, explainable state (FOMO, greed,
-   chop, fear, panic, dead liquidity) instead of a bare table.
-2. **Rankings are a game** — a six-board arena built from live data.
-3. **Data is content** — the event stream narrates what just happened, and
-   Meme Studio turns a pair into a shareable PNG.
+质量门禁：
 
-![Crypto Radar overview](docs/screenshots/overview.png)
+```bash
+npm run typecheck     # tsc -b --force
+npm run lint          # eslint --max-warnings 0
+npm run test          # vitest：指标 / 规则 / 引擎 / 解析 / 存储
+npm run verify        # 上面三步 + 生产构建
+npm run e2e           # 对真实行情的浏览器流程测试（需先 npm run preview）
+npm run audit:layout  # 5 种视口 × 7 个页面的布局与对比度审计 + 截图
+```
 
-## What it does
+`npm run e2e` 与 `npm run audit:layout` 需要先启动预览服务，并且默认访问
+`http://127.0.0.1:4174/crypto-radar`（可用 `BASE_URL` 覆盖）。
 
-| Module | Highlights |
-| --- | --- |
-| **War-room home** | Mood dashboard, the arena and the event stream on the first screen, with the full table one switch away. |
-| **Market overview** | One dense table for spot, perpetuals and Alpha tokens. Search, sort on every column, show/hide columns, reorder columns, switch the row density and filter by quote asset. |
-| **Live prices** | One shared WebSocket per market (`!miniTicker@arr`) with batched 250 ms updates, price flash animations and an honest connection state. |
-| **Candlestick charts** | Lightweight Charts with volume, 15 intervals, historical paging, a live-updating last candle, crosshair OHLC readout and a price line. |
-| **Technical indicators** | MA, EMA, RSI and MACD — each toggleable, configurable and rendered on top of the chart without a page reload. |
-| **Watchlists** | Multiple named lists, add/remove, rename, reorder, persisted in `localStorage` with corruption-safe reads. |
-| **Market screener** | Scans spot, perpetual and Alpha at the same time and renders the anomalies in a virtualised table: strong gainers, strong losers, high volume, elevated funding, short-term moves and a custom rule set. |
-| **Heatmap** | A turnover weighted treemap of the whole market: tile area is the 24 h turnover, colour is the 24 h change. One glance shows where the money is moving. |
-| **Basis radar** | The same asset priced on spot and on the perpetual contract, with the premium between them and the funding rate annualised — a cross-market view neither a spot table nor a futures table can give. |
-| **Price alerts** | Threshold rules evaluated against the live feed, delivered through a browser notification, persisted locally and re-armable. |
-| **Market breadth** | Advancers versus decliners drawn as a single stacked bar next to the leaderboard tabs. |
-| **24 h range bar** | Every row shows where the price sits between its 24 h low and high. |
-| **Bilingual UI** | Complete Chinese and English interfaces driven by one dictionary, with the choice persisted. |
+---
 
-## Meme 2.0 surfaces
+## 2. 六个页面
 
-| Home — mood, arena, events | Arena |
-| --- | --- |
-| ![Home](docs/screenshots/home.png) | ![Arena](docs/screenshots/arena.png) |
-
-| Event centre | Meme Studio |
-| --- | --- |
-| ![Events](docs/screenshots/events.png) | ![Studio](docs/screenshots/studio.png) |
-
-| Trader base | Phone |
-| --- | --- |
-| ![Profile](docs/screenshots/profile.png) | ![Phone home](docs/screenshots/mobile-home.png) |
-
-## Screenshots
-
-| Spot | Perpetual futures |
-| --- | --- |
-| ![Spot market](docs/screenshots/spot.png) | ![Perpetual market](docs/screenshots/futures.png) |
-
-| Alpha tokens | Candlestick chart |
-| --- | --- |
-| ![Alpha tokens](docs/screenshots/alpha.png) | ![Chart](docs/screenshots/chart.png) |
-
-| Screener | Phone layout |
-| --- | --- |
-| ![Screener](docs/screenshots/screener.png) | ![Phone layout](docs/screenshots/mobile-spot.png) |
-
-| Phone — spot | Phone — chart |
-| --- | --- |
-| ![Phone spot](docs/screenshots/mobile-spot.png) | ![Phone chart](docs/screenshots/mobile-chart.png) |
-
-| Phone — Alpha | Phone — screener |
-| --- | --- |
-| ![Phone alpha](docs/screenshots/mobile-alpha.png) | ![Phone screener](docs/screenshots/mobile-screener.png) |
-
-## The three features that set it apart
-
-| Heatmap | Basis radar |
-| --- | --- |
-| ![Heatmap](docs/screenshots/heatmap.png) | ![Basis radar](docs/screenshots/basis.png) |
-
-![Price alerts](docs/screenshots/alerts.png)
-
-### 1. Turnover weighted heatmap
-
-The table answers "what is moving"; the heatmap answers **where the money is**.
-Every pair becomes a tile sized by its 24 h turnover and coloured by its 24 h
-change, laid out with a squarified treemap so the tiles stay readable. One
-click returns to the table and the leaderboard filters still apply.
-
-### 2. Cross-market basis radar
-
-Spot and perpetual are two books on the same asset. The radar joins them on the
-base asset and shows the premium the contract trades at, plus the funding rate
-annualised (three settlements a day). A pair trading at a premium while paying
-positive funding is a carry cost; a discount paying negative funding is the
-mirror image. No single-market table can show this.
-
-### 3. Price alerts
-
-Set a threshold (`above` / `below`) on any spot, perpetual or Alpha pair. The
-engine watches the live feed while the terminal is open, fires a browser
-notification on the crossing, disables the rule so it cannot spam, and keeps it
-in `localStorage` so it survives a reload.
-
-## Routes
-
-| Route | What it is |
-| --- | --- |
-| `/` | War room: mood, arena, event stream, or the full table / heatmap |
-| `/spot` `/perp` `/alpha` | Full market table for each venue |
-| `/chart/:market/:symbol` | Candles, volume, MA/EMA on the price axis, RSI and MACD in their own panes |
-| `/events` | Event centre with rule and severity filters and editable thresholds |
-| `/studio` | Meme Studio — render a card from live data and export a PNG |
-| `/basis` | Cross-market basis radar |
-| `/screener` | Anomaly screener |
-| `/alerts` | Price alerts |
-| `/watchlists` | Watchlists |
-| `/profile` | Trader base: theme, pixel avatar, default home view |
-| `/settings` | Preferences |
-
-## Data sources
-
-All endpoints are public and need **no API key**:
-
-| Market | REST | WebSocket |
+| 页面 | 路径 | 作用 |
 | --- | --- | --- |
-| Spot | `api.binance.com/api/v3` | `stream.binance.com:9443/ws` |
-| Perpetual (USDⓈ-M) | `fapi.binance.com/fapi/v1` | `fstream.binance.com/ws` |
-| Alpha tokens | `www.binance.com/bapi/defi/v1/.../alpha/all/token/list` | — (polled every 20 s) |
+| Command Center 作战室 | `/` | 市场情绪 SITREP、实时异动播报、榜单、自选速览、今日最离谱 |
+| Markets 行情 | `/markets` | 现货 / 永续 / Alpha 的虚拟化行情表，排序、筛选、自定义列 |
+| Radar 异动雷达 | `/radar` | 自定义扫描规则（AND/OR）、实时命中结果、每条命中的触发依据 |
+| Charts K 线 | `/charts` | Lightweight Charts 蜡烛图 + 成交量 + MA/EMA/BOLL/RSI/MACD |
+| Meme Studio | `/studio` | 5 个原创模板，把真实行情渲染成 1200×675 / 1080×1080 PNG |
+| Watchlist 自选 | `/watchlist` | 分组、拖拽排序、价格提醒（仅页面打开时生效） |
+| Settings 设置 | `/settings` | 动效、密度、默认市场/周期、指标参数、雷达阈值、本地数据 |
 
-The Alpha module uses the public token-list endpoint that Binance itself calls
-from the Alpha web app; it returns the price, 24 h change, volume, market cap,
-liquidity and chain metadata of every Alpha token. **Binance does not publish
-a public kline endpoint for Alpha tokens** — instead of inventing candles the
-app states this explicitly on the chart page.
+---
 
-Perpetual-only fields (mark price, funding rate, next funding time, open
-interest) are read from the dedicated futures endpoints, never from spot data.
+## 3. 数据来源（全部为官方公开接口）
 
-## Tech stack
-
-- **React 18** + **TypeScript 5** + **Vite 6**
-- **Tailwind CSS 3** with a token-based dark theme
-- **Zustand** for state
-- **Lightweight Charts 4** (Apache-2.0) for the candlestick chart
-- **TanStack Virtual** for the virtualised market table
-- **Zod** for response validation
-- **Vitest** for unit tests, **Playwright** for end-to-end tests
-
-## Getting started
-
-```bash
-git clone https://github.com/iiiiiiiiiiiiiKK/crypto-radar.git
-cd crypto-radar
-npm install
-npm run dev
-```
-
-The dev server runs on <http://localhost:5173>.
-
-### Commands
-
-| Command | Description |
+| 能力 | 接口 |
 | --- | --- |
-| `npm run dev` | Start the Vite dev server |
-| `npm run build` | Type check and build the production bundle into `dist/` |
-| `npm run preview` | Serve the production bundle locally |
-| `npm run typecheck` | `tsc -b` without emitting |
-| `npm run lint` | ESLint, zero warnings tolerated |
-| `npm run test` | Vitest unit test suite |
-| `npm run test:e2e` | Playwright end-to-end suite (uses live data) |
-| `npm run audit:layout` | Check every page on five device profiles for overflow and clipping |
-| `npm run verify:live` | Drive the deployed site against the live API |
-| `npm run screenshots` | Capture the desktop and phone screenshots |
-| `npm run verify` | typecheck → lint → test → build |
+| 现货全市场 24h 快照 | `GET https://api.binance.com/api/v3/ticker/24hr` |
+| 永续全市场 24h 快照 | `GET https://fapi.binance.com/fapi/v1/ticker/24hr` |
+| 交易规则 / 精度 | `GET /api/v3/exchangeInfo`、`GET /fapi/v1/exchangeInfo` |
+| 现货实时全市场 | `wss://stream.binance.com:9443/ws` → `!miniTicker@arr` |
+| 永续实时全市场 | `wss://fstream.binance.com/ws` → `!miniTicker@arr` |
+| 资金费率 / 标记价格 / 下次结算 | 流 `!markPrice@arr@1s` + REST `/fapi/v1/premiumIndex` |
+| 持仓量 | REST `/fapi/v1/openInterest`（对高流动性合约轮询，逐个交易对） |
+| K 线历史 | `GET /api/v3/klines`、`GET /fapi/v1/klines`（每次 500 根） |
+| K 线实时 | `<symbol>@kline_<interval>` |
+| Alpha | `GET https://www.binance.com/bapi/defi/v1/public/wallet-direct/buw/wallet/cex/alpha/all/token/list`（页面轮询，约 30s） |
 
-### Environment variables
+### 本地计算 vs 交易所字段
 
-Everything is optional — the app works out of the box against the official
-Binance endpoints. See [`.env.example`](.env.example):
+界面会明确区分两者：
 
-| Variable | Purpose |
-| --- | --- |
-| `VITE_PROXY_BASE` | Base URL of the bundled edge proxy. Leave empty to call Binance directly. |
-| `VITE_SPOT_REST_BASE` / `VITE_FUTURES_REST_BASE` / `VITE_ALPHA_REST_BASE` | Override the upstream hosts. |
-| `VITE_SPOT_WS_BASE` / `VITE_FUTURES_WS_BASE` | Override the websocket hosts. |
-| `VITE_ALPHA_POLL_MS` | Alpha polling interval in milliseconds (default `20000`). |
+* **交易所字段**：最新价、24h 涨跌幅、24h 高低、成交量、成交额、标记价格、指数价格、资金费率、下次结算时间、持仓量。
+* **本地计算**：1m/5m/15m/1h 涨跌幅（本地采样窗口）、成交额/分钟与量能倍数（相对最近 15 分钟基准）、
+  持仓量变化、MA / EMA / BOLL / RSI / MACD、市场情绪、异动事件、扫描命中。
+* 页面启动时会用 **1 分钟 K 线的真实收盘价**为高流动性交易对补种窗口（每个市场最多 60 个），
+  所以 1m/5m/15m 指标不必等五分钟才出现；成交额基准仍需本地累计。
 
-## Deployment
+---
 
-### GitHub Pages (this repository)
+## 4. 技术栈
 
-The `.github/workflows/deploy.yml` workflow builds the app and publishes it to
-GitHub Pages on every push to `main`:
+* **React 18 + TypeScript + Vite 6**（纯静态站点，浏览器直连交易所）
+* **Zustand**（偏好 / 自选 / 提醒，localStorage 持久化）
+* **Lightweight Charts 4**（K 线与副图，多图表时间轴联动）
+* **@tanstack/react-virtual**（行情表虚拟化，771 行只渲染 28 行 DOM）
+* **Zod**（所有上游响应都做运行时校验）
+* 手写设计系统（CSS 变量 + 语义类），无 UI 框架、无外部字体依赖
 
-1. **Settings → Pages → Build and deployment → Source**: choose **GitHub
-   Actions**.
-2. Push to `main` — the workflow runs type check, lint, unit tests and the
-   production build, then deploys `dist/`.
+---
 
-Live URL: <https://iiiiiiiiiiiiiKK.github.io/crypto-radar/>
+## 5. 架构要点
 
-Because GitHub Pages has no SPA fallback, the repository ships a `404.html`
-that restores deep links such as `/crypto-radar/spot`.
-
-### Edge proxy (optional)
-
-Some networks cannot reach the Binance futures endpoints directly — the exit IP
-is rate limited (HTTP 418/429) or the WebSocket upgrade is blocked. The
-repository bundles a **Cloudflare Worker** that forwards a fixed, market scoped
-set of paths to Binance:
-
-```bash
-cd worker
-npm install
-npx wrangler deploy
+```
+src/
+├─ engine/          # 行情引擎：tickerStore、history、events、scanner、mood
+├─ services/        # REST 适配器（spot/futures/alpha）、WebSocket 管理、K 线流
+├─ stores/          # zustand：preferences / watchlist / alerts / ui
+├─ hooks/           # useRow / useMarketRows / useEvents / useHotkeys …
+├─ features/        # 页面级业务模块（command、markets、charts、studio、search）
+├─ components/      # shell（导航、搜索、状态）与 ui（面板、Delta、Sparkline …）
+├─ pages/           # 七个页面
+├─ styles/          # tokens.css / app.css / pages.css
+└─ types/           # 统一行情数据模型
 ```
 
-Then point the front end at it:
+* **一个引擎实例持有全部 WebSocket**：页面切换不会重连；标签页隐藏时暂停，回到前台恢复。
+* **每行独立订阅**：价格变化只重绘变化的行（`useSyncExternalStore` + 行级快照对象）。
+* **列表级节流**：排序/筛选/re-render 最多每 320ms 一次。
+* **断线自愈**：指数退避重连、订阅恢复、心跳检测、重连后重置历史窗口避免“假跳变”。
 
-```bash
-VITE_PROXY_BASE=https://<your-worker>.workers.dev npm run build
-```
+更多细节见 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)、[`docs/DESIGN-SYSTEM.md`](docs/DESIGN-SYSTEM.md)。
 
-The proxy is **not** an open relay: the upstream origin and the path prefix
-come from a whitelist, unknown routes return `404` and paths outside the
-documented Binance API are rejected with `400`.
+---
 
-### Anywhere else
+## 6. 已知限制（不隐藏）
 
-```bash
-npm run build
-```
+1. **Alpha 没有官方文档接口**，也没有 K 线 / WebSocket。它使用 Alpha 页面自身使用的公开 web 接口轮询，
+   随时可能变更；因此 Alpha 不提供资金费率、持仓量、分钟级指标，也不参与异动扫描。
+2. **持仓量为逐交易对轮询**，覆盖前 120 个高流动性合约，变化需要 5–10 分钟采样才可计算。
+3. **价格提醒只在页面打开时生效**，没有后台推送（界面已明确标注）。
+4. **自选/偏好存储在浏览器本地**，不是云端同步。
+5. 若部署网络无法访问币安，仓库内的 `worker/`（Cloudflare Worker，固定白名单路径）可作为可选代理；
+   在浏览器中设置 `VITE_PROXY_BASE` 即可启用，不会暴露任何密钥。
+6. 亚秒级委托簿、逐笔成交、下单能力不在本版本范围内。
 
-`dist/` is a static bundle — it can be hosted on Vercel, Cloudflare Pages,
-Netlify or any static host. Set `VITE_BASE_PATH` at build time when the site
-is served from a sub-path.
+---
 
-## How the live data works
+## 7. 部署
 
-- **One socket per market.** `WsManager` multiplexes every subscription over
-  a single connection, so the app never opens one socket per table row.
-- **Batched updates.** Incoming frames are buffered for 250 ms and merged into
-  a ticker map, which keeps a busy market from re-rendering the whole table on
-  every message.
-- **Honest state.** The badge shows *Connecting*, *Live*, *Reconnecting*,
-  *Disconnected*, *Delayed* or *Error*. When frames stop arriving for 30
-  seconds the feed is marked **stale** instead of pretending the price is live.
-- **Backoff with jitter.** Reconnects use exponential backoff plus a random
-  jitter and restore every subscription afterwards.
-- **Fast first paint.** The 24 h ticker list is fetched first; the heavy
-  `exchangeInfo` payload (per-pair tick size, base and quote asset) is merged
-  in afterwards and cached for six hours.
+* 默认发布到 GitHub Pages 子路径 `/crypto-radar/`（`.github/workflows/deploy.yml`）。
+* 也可以部署到任意静态托管：`VITE_BASE_PATH=/ npm run build` 后上传 `dist/`。
+* `public/404.html` 处理 GitHub Pages 的 SPA 回退。
 
-## Testing
+## 8. 许可
 
-```bash
-npm run test        # 62 unit tests
-npm run test:e2e    # 9 Playwright tests x desktop + mobile viewports
-npm run verify:live # drives the deployed site against the live API
-```
-
-The unit suite covers price/percentage/precision formatting, indicator maths
-(MA, EMA, RSI, MACD), API response parsing, screener rules, K-line ordering,
-watchlist and settings persistence, the WebSocket subscription/reconnect
-logic and the bilingual dictionary.
-
-The end-to-end suite drives a real browser against the **live** Binance API and
-checks that rows render, search filters, sorting works, the watchlist survives
-a reload, the chart draws candles and indicators, the perpetual table shows
-futures-only data (funding rate), the screener filters on real data, the
-language toggle switches the interface and that the mobile layout does not
-overflow horizontally.
-
-## Security and privacy
-
-- **No API keys, ever.** The project only uses public market data and never
-  asks for an exchange key or secret.
-- **No trading.** Crypto Radar is a monitoring tool; it cannot place orders.
-- **No private data.** Watchlists and preferences stay in your own browser's
-  `localStorage`. Nothing is uploaded anywhere.
-- **No open proxy.** The optional edge proxy only forwards a fixed, market
-  scoped set of paths to Binance — it cannot be used to fetch arbitrary URLs.
-- **Validated responses.** Every API payload is parsed with Zod before it
-  reaches the UI.
-- **Defensive storage.** Corrupted `localStorage` values are discarded
-  instead of crashing the app.
-
-## Known limitations
-
-- Binance does not publish Alpha klines, so Alpha tokens have no candlestick
-  chart.
-- Alpha prices are polled (every 20 s) because Binance exposes no Alpha
-  websocket.
-- Funding rate, mark price and open interest are only available for perpetual
-  contracts.
-- In regions where Binance blocks the API, direct calls fail with HTTP 418/429.
-  The client rotates through Binance's official hostnames, and the bundled edge
-  proxy repeats the rotation from a server-side IP.
-- The screener uses the 24 h open price for the short-window calculation
-  because Binance does not publish a free short-interval change field for
-  every symbol.
-
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md). Architecture notes are in
-[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) and common problems are listed in
-[docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md).
-
-## License
-
-[MIT](LICENSE) © Crypto Radar contributors.
-
-Data is provided by the public Binance API; TradingView Lightweight Charts is
-licensed under Apache-2.0.
-
-<div align="center">
-  <a href="https://x.com/0xkillcoin">
-    <img src="https://img.shields.io/badge/X-%40killcoin-0F1715?style=flat-square&logo=x&logoColor=white" alt="Follow on X" />
-  </a>
-</div>
+MIT。行情数据版权归 Binance 所有，本项目与 Binance 无隶属关系。
+Meme 卡片中的像素图形与版式均为本项目原创绘制。

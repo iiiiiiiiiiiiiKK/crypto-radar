@@ -1,13 +1,15 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { AppRoutes } from "./app/routes";
-import "./index.css";
+import { App } from "./App";
+import "./styles/tokens.css";
+import "./styles/app.css";
+import "./styles/pages.css";
 
 const container = document.getElementById("root");
-if (!container) throw new Error("Root element #root is missing");
+if (!container) throw new Error("Root container missing");
 
 createRoot(container).render(
   <StrictMode>
-    <AppRoutes />
+    <App />
   </StrictMode>,
 );

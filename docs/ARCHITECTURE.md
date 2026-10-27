@@ -1,105 +1,82 @@
-# Architecture
+# 架构说明
+
+## 1. 分层
 
 ```
-src/
-  app/            routing (React Router, basename = BASE_URL)
-  components/
-    layout/       app shell: top bar, sidebar, mobile nav
-    market/       market table, column definitions, toolbar
-    chart/        Lightweight Charts wrapper
-    ui/           reusable primitives (badge, modal, spinner, states)
-  features/
-    spot/         overview + spot page, sorting/filtering rules
-    futures/      perpetual futures page
-    alpha/        Binance Alpha token page
-    chart/        candlestick page, kline loading hook
-    screener/     anomaly screener rules and page
-    watchlist/    watchlist management page
-    settings/     preferences page
-    indicators/   MA / EMA / RSI / MACD maths
-  services/
-    binance/      one adapter per market + shared HTTP client
-    websocket/    shared WebSocket manager + market feed
-    storage/      safe localStorage wrappers
-  stores/         Zustand stores (market, settings, watchlists, ui)
-  lib/            formatting, endpoints, constants
-  i18n/           zh / en dictionary
-  types/          shared domain types
-
-worker/           optional Cloudflare edge proxy (see worker/README section)
+浏览器
+  ├─ services/            传输层（REST + WebSocket）
+  │   ├─ http.ts          请求、域名轮换、限流/封锁错误分类
+  │   ├─ spot.ts          现货适配器（ticker/24hr、exchangeInfo、klines）
+  │   ├─ futures.ts       永续适配器（+ premiumIndex、openInterest）
+  │   ├─ alpha.ts         Alpha 适配器（web 公开接口轮询）
+  │   └─ ws/              WsManager（共享连接）、MarketFeed（整市场增量）、KlineStream（单合约 K 线）
+  ├─ engine/              计算层（与 React 无关，可单测）
+  │   ├─ tickerStore.ts   行情行存储、快照、按行订阅、派生指标
+  │   ├─ history.ts       60 分钟 5 秒采样的环形缓冲；持仓量采样
+  │   ├─ events.ts        异动规则 + 事件日志（去重、冷却）
+  │   ├─ scanner.ts       Radar 规则引擎与预设
+  │   ├─ metrics.ts       指标读取 / 比较 / 格式化
+  │   └─ mood.ts          规则化市场情绪
+  ├─ stores/              zustand（preferences / watchlist / alerts / ui）
+  ├─ hooks/               useEngine 桥接（useSyncExternalStore）
+  └─ pages, features, components, styles
 ```
 
-## Data flow
+`engine` 不依赖 React；`services` 不依赖 `engine`。这样核心逻辑全部可以单元测试，
+UI 只负责渲染快照与派发动作。
 
-1. `MarketFeed` asks the matching `MarketAdapter` for a REST snapshot.
-2. The snapshot is pushed into the Zustand market store and rendered by
-   `MarketTable`.
-3. `WsManager` opens **one** socket per market and subscribes to
-   `!miniTicker@arr`, which delivers every symbol of that market in a
-   single frame.
-4. Incoming deltas are buffered for 250 ms and then merged into the store,
-   so a burst of updates causes one render instead of hundreds.
-5. Heavy metadata (per-pair tick size, base/quote assets) is merged in
-   afterwards through `applyMetadata`, so the first paint is not blocked by
-   the multi-megabyte `exchangeInfo` payload.
-6. The perpetual market is enriched in one extra request through
-   `listExtras()` (funding rate, mark price, index price for every
-   contract).
+## 2. 数据流
 
-## Adapter contract
+```
+REST 快照 ─┐
+           ├─> TickerStore.applySnapshot()   （完整交易对全集，diff 后保留其它市场）
+WS 增量 ───┼─> TickerStore.applyTicker()     （价格/24h 统计 + 历史采样 + 派生指标）
+WS 标记价 ─┼─> TickerStore.applyMark()       （标记价/指数价/资金费率/下次结算）
+OI 轮询 ───┴─> TickerStore.applyOpenInterest()
 
-```ts
-interface MarketAdapter {
-  readonly id: MarketId;
-  listSymbols(): Promise<SymbolMeta[]>;
-  listTickers(): Promise<MarketTicker[]>;
-  listKlines(id, interval, limit?): Promise<Candle[]>;
-  fetchExtras?(id): Promise<Partial<MarketTicker>>;
-  listExtras?(): Promise<Map<string, Partial<MarketTicker>>>;
-  applyMetadata?(tickers): Promise<MarketTicker[]>;
-}
+TickerStore ──> 行级订阅（useRow）      → 只有价格变化的行重绘
+            └─> 全局版本号（320ms 节流） → 表格排序/筛选、榜单、情绪重算
 ```
 
-Each market keeps its own field set. The perpetual adapter adds
-`markPrice`, `fundingRate`, `nextFundingTime` and `openInterest`; the
-Alpha adapter adds `chainName`, `contractAddress` and `iconUrl`. Nothing is
-invented to make the three markets look alike.
+## 3. 渲染性能
 
-## Network resilience
+* **行级订阅**：`useRow(key)` 通过 `useSyncExternalStore` 订阅单个 key，快照对象只在
+  该行真正变化时替换，因此 1 秒一次的整市场推送不会让 771 行的表格全量重绘。
+* **列表节流**：`TickerStore.scheduleFlush()` 最多每 320ms 提升一次全局版本号。
+* **虚拟化**：`@tanstack/react-virtual` 只挂载视口内的行（桌面 771 行 → 28 个 DOM 节点）。
+* **图表命令式更新**：WebSocket 的 K 线推送直接调用 `series.update()`，不触发 React 重渲染。
+* **按需订阅**：切换到没有图表/没有扫描的页面时，K 线流会 `close()` 释放订阅。
 
-Binance rate limits aggressively and serves the same API from several
-hostnames. Both layers therefore rotate:
+## 4. 数据完整性
 
-- **Client** — `restHosts(market)` lists the official hostnames.
-  `fetchJson` walks the list and remembers the host that answered, so a
-  single rate-limited hostname does not break the screen.
-- **Edge proxy** — the bundled Worker repeats the same rotation from a
-  server-side IP and adds a short cache.
+1. **永不补零**：所有交易所字段都是 `number | null`。缺失即 `null`，UI 显示“不可用 / 采集中 / 数据不足”。
+2. **运行时校验**：每个 REST 响应都过 Zod schema，字段级 `optional()`，结构变化不会崩溃 UI。
+3. **新鲜度闸门**：规则引擎不消费 45 秒以上的旧数据；Radar 的 `maxAgeMs` 可配置。
+4. **断线重置**：WS 从断开恢复时清空该市场的采样窗口，避免“价格断层”被当成真实异动。
+5. **口径标注**：情绪面板注明样本数与覆盖面，Alpha 面板注明字段缺失，成交量榜注明低流动性。
 
-The futures WebSocket is blocked on some networks. When no frame arrives for
-20 s the feed falls back to a light REST poll (`/fapi/v1/ticker/price`) so
-the prices keep moving, and the connection badge reports the state honestly.
+## 5. 连接管理
 
-## WebSocket lifecycle
+* 每个市场一条 WebSocket（现货、永续各一条，K 线另有一条独立连接）。
+* `WsManager`：指数退避（1s → 20s + 抖动）、`SUBSCRIBE/UNSUBSCRIBE` 复用、
+  心跳检测（35 秒无帧 → `stale`，140 秒 → 强制重连）、20 小时主动轮换（官方 24h 上限）。
+* 页面隐藏时暂停全部连接与定时器，回到前台恢复并补一次快照。
+* 全市场流使用 `!miniTicker@arr` / `!markPrice@arr@1s`，一条连接即可覆盖整个市场，
+  远低于官方“单连接最多 1024 stream、5 条入站消息/秒”的限制。
 
-| State | Meaning |
-| --- | --- |
-| `connecting` | first connection attempt |
-| `connected` | socket is open and frames are arriving |
-| `reconnecting` | the socket dropped, exponential backoff is running |
-| `disconnected` | closed on purpose (no subscribers left) |
-| `stale` | open, but no frame for 30 s |
-| `error` | the socket reported an error |
+## 6. REST 预算
 
-Reconnects use exponential backoff with a random jitter and restore every
-subscription. A stream that stops delivering data is marked `stale` instead
-of silently showing outdated prices.
+| 用途 | 频率 | 说明 |
+| --- | --- | --- |
+| 24h 快照 | 首次 + 手动刷新 + 重连 2 分钟后 | 现货 `/ticker/24hr` 权重 80 |
+| exchangeInfo | 首次（本地缓存 6 小时） | 权重 20 |
+| 1m K 线补种 | 每个市场最多 60 个交易对（6 并发） | 权重 2/次 |
+| 持仓量 | 每 15 秒 12 个，覆盖前 120 个合约 | 权重 1/次 |
+| K 线历史 | 切换交易对/周期时 | 500 根 |
 
-## Performance
+## 7. 错误处理
 
-- Virtualised table (only the visible rows are in the DOM).
-- 250 ms batching of websocket updates.
-- Ticker map kept outside React state to avoid unnecessary re-renders.
-- `exchangeInfo` cached in localStorage for six hours.
-- Chart instances are created once and updated in place; toggling an
-  indicator never remounts the page.
+* `http.ts` 区分限流（418/429）、区域封锁（403/451）、超时、5xx、JSON 损坏，并给出可操作文案。
+* 每个市场独立维护 `state` 与 `error`，一个市场失败不影响另一个市场。
+* UI 层：`ConnectionBanner` 显示状态、最后更新时间与重试按钮；旧数据会保留但被标注。
+* 空状态区分“正在加载”“连接失败”“规则无命中”“指标预热中”四种情形。

@@ -1,68 +1,408 @@
 /* ==========================================================================
-   Crypto Radar — Meme 作战室设计令牌
-   --------------------------------------------------------------------------
-   三种语汇并存，但各有严格用途：
-   · 赛博终端  → 面板、边框、数字（冷静、高密度）
-   · 像素 HUD  → 标题、名次、状态徽章（切角、硬阴影）
-   · 互联网漫画 → 贴纸、事件卡（描边、轻微旋转）
-
-   颜色只通过变量使用，组件里不允许出现裸十六进制值。
+   Crypto Radar 2.0 — design tokens, reset, typography, primitives
    ========================================================================== */
 
 :root {
-  /* 基底：比纯黑偏蓝，荧光色才有对比 */
-  --cr-bg: 7 8 13;
-  --cr-bg-2: 10 12 19;
-  --cr-panel: 14 16 24;
-  --cr-panel-2: 20 24 38;
-  --cr-panel-3: 26 31 48;
-  --cr-line: 35 42 61;
-  --cr-line-soft: 26 31 45;
+  /* --- surface ---------------------------------------------------------- */
+  --bg: #06080b;
+  --bg-2: #080b10;
+  --panel: #0c1117;
+  --panel-2: #101822;
+  --panel-3: #151f2a;
+  --line: #1a232d;
+  --line-2: #24313d;
+  --line-3: #33424f;
 
-  /* 霓虹：仅用于强调、选中与关键操作 */
-  --cr-accent: 57 255 136;
-  --cr-up: 57 255 136;
-  --cr-down: 255 59 107;
-  --cr-voltage: 177 76 255;
-  --cr-warn: 255 233 74;
-  --cr-cyan: 51 225 255;
+  /* --- ink -------------------------------------------------------------- */
+  --ink: #edf3f9;
+  --ink-2: #9daebd;
+  --ink-3: #7d8d9c;
+  --ink-4: #4c5a66;
 
-  --cr-text: 232 238 252;
-  --cr-muted: 125 135 158;
-  --cr-faint: 84 93 117;
+  /* --- signal ----------------------------------------------------------- */
+  --up: #00f5a0;
+  --up-dim: #0a8f63;
+  --up-soft: rgba(0, 245, 160, 0.1);
+  --down: #ff4d67;
+  --down-dim: #a8293c;
+  --down-soft: rgba(255, 77, 103, 0.1);
+  --blue: #55b8ff;
+  --blue-soft: rgba(85, 184, 255, 0.12);
+  --violet: #b18cff;
+  --violet-soft: rgba(177, 140, 255, 0.12);
+  --amber: #ffd166;
+  --amber-soft: rgba(255, 209, 102, 0.12);
+  --hot: #ff8a3d;
 
-  /* 直接引用的十六进制别名（用于 box-shadow / clip-path 等场景） */
-  --cr-bg-hex: #07080d;
-  --cr-panel-hex: #0e1018;
-  --cr-panel-2-hex: #141826;
-  --cr-line-hex: #232a3d;
-  --cr-accent-hex: #39ff88;
-  --cr-up-hex: #39ff88;
-  --cr-down-hex: #ff3b6b;
-  --cr-voltage-hex: #b14cff;
-  --cr-warn-hex: #ffe94a;
-  --cr-cyan-hex: #33e1ff;
-  --cr-text-hex: #e8eefc;
-  --cr-muted-hex: #7d879e;
-  --cr-faint-hex: #545d75;
+  /* --- type ------------------------------------------------------------- */
+  --font-display: "Bahnschrift", "Segoe UI Variable Display", "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+  --font-ui: "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui,
+    -apple-system, sans-serif;
+  --font-mono: "Cascadia Mono", "SF Mono", "JetBrains Mono", "Roboto Mono", Consolas,
+    "Liberation Mono", ui-monospace, monospace;
 
-  /* 圆角克制：HUD 面板靠切角，不靠大圆角 */
-  --cr-radius-sm: 2px;
-  --cr-radius: 3px;
-  --cr-radius-md: 4px;
+  --fs-10: 10px;
+  --fs-11: 11px;
+  --fs-12: 12px;
+  --fs-13: 13px;
+  --fs-14: 14px;
+  --fs-16: 16px;
+  --fs-20: 20px;
+  --fs-26: 26px;
+  --fs-34: 34px;
+  --fs-46: 46px;
 
-  --cr-header-h: 48px;
-  --cr-sidebar-w: 184px;
-  --cr-sidebar-w-collapsed: 56px;
-  --cr-bottom-h: 54px;
-  --cr-safe-bottom: env(safe-area-inset-bottom, 0px);
+  /* --- metrics ---------------------------------------------------------- */
+  --rail-w: 76px;
+  --topbar-h: 58px;
+  --tape-h: 30px;
+  --gap: 14px;
+  --pad: 16px;
+  --radius: 2px;
 
-  --cr-font-mono: "JetBrains Mono", "SFMono-Regular", "SF Mono", Menlo, Consolas,
-    "Roboto Mono", monospace;
-  --cr-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC",
-    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
-  /* 像素/街机：不引入外部字体，用等宽 + 字距 + 硬阴影造出点阵感 */
-  --cr-font-pixel: "Courier New", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --shadow-panel: 0 1px 0 rgba(255, 255, 255, 0.02) inset, 0 18px 40px -30px #000;
+  --shadow-pop: 0 24px 60px -24px rgba(0, 0, 0, 0.9), 0 0 0 1px var(--line-2);
 
-  --cr-scanline: rgba(57, 255, 136, 0.045);
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* --- reset ---------------------------------------------------------------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-13);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+/* The battlefield floor: faint grid + a soft light from the top. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(120, 190, 255, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(120, 190, 255, 0.028) 1px, transparent 1px);
+  background-size: 32px 32px, 32px 32px;
+  background-position: center top;
+  mask-image: radial-gradient(120% 90% at 50% 0%, #000 10%, transparent 78%);
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(90% 50% at 50% -10%, rgba(85, 184, 255, 0.07), transparent 70%),
+    radial-gradient(70% 40% at 100% 0%, rgba(177, 140, 255, 0.05), transparent 70%);
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+canvas,
+svg {
+  display: block;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+}
+
+::selection {
+  background: rgba(0, 245, 160, 0.28);
+  color: #fff;
+}
+
+/* --- scrollbars ----------------------------------------------------------- */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-3) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--line-2);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--line-3);
+  background-clip: padding-box;
+}
+
+/* --- typography ----------------------------------------------------------- */
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "ss01" 1;
+}
+
+.num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-10);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.display {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.up {
+  color: var(--up);
+}
+
+.down {
+  color: var(--down);
+}
+
+.flat {
+  color: var(--ink-2);
+}
+
+.muted {
+  color: var(--ink-2);
+}
+
+.dim {
+  color: var(--ink-3);
+}
+
+/* --- layout primitives ---------------------------------------------------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+}
+
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.gap-4 {
+  gap: 4px;
+}
+.gap-6 {
+  gap: 6px;
+}
+.gap-8 {
+  gap: 8px;
+}
+.gap-10 {
+  gap: 10px;
+}
+.gap-12 {
+  gap: 12px;
+}
+.gap-16 {
+  gap: 16px;
+}
+
+.grow {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --- motion --------------------------------------------------------------- */
+@keyframes cr-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cr-flash-up {
+  0% {
+    background-color: rgba(0, 245, 160, 0.16);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes cr-flash-down {
+  0% {
+    background-color: rgba(255, 77, 103, 0.16);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+@keyframes cr-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes cr-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes cr-tape {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes cr-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes cr-shimmer {
+  from {
+    background-position: -220px 0;
+  }
+  to {
+    background-position: 220px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* The user can also switch motion off from settings (data attribute). */
+html[data-motion="calm"] *,
+html[data-motion="calm"] *::before,
+html[data-motion="calm"] *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
 }

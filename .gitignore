@@ -21,3 +21,10 @@ test-results/
 e2e/screenshots/
 *.tsbuildinfo
 live-verification.txt
+
+# audit artefacts
+audit-report.json
+flows-report.json
+audit-out.txt
+docs/screenshots/*.png
+audit-final.txt
