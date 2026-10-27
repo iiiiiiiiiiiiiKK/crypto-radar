@@ -102,6 +102,7 @@ function corsHeaders(request: Request, env: Env): Record<string, string> {
     "Access-Control-Allow-Origin": allowOrigin,
     "Access-Control-Allow-Methods": "GET, OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Expose-Headers": "X-Cache, X-Upstream-Origin",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   };
@@ -189,6 +190,40 @@ export default {
     }
 
     const url = new URL(request.url);
+
+    // A cheap health check that never touches Binance.
+    if (url.pathname === "/health") {
+      return json({ ok: true, service: "crypto-radar-proxy" }, 200, cors);
+    }
+
+    // Diagnostic route: reports which upstream host and header profile the
+    // exchange currently accepts. Disabled by default.
+    if (url.pathname === "/diag" && env.ENABLE_DIAGNOSTICS === "1") {
+      const targets = [
+        ["spot", "https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT"],
+        ["fut", "https://fapi.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT"],
+        ["www-fut", "https://www.binance.com/fapi/v1/ticker/price?symbol=BTCUSDT"],
+      ];
+      const lines: string[] = [];
+      for (const [label, target] of targets) {
+        for (const [profileName, profile] of Object.entries(HEADER_PROFILES)) {
+          try {
+            const res = await fetch(target, { headers: profile });
+            const body = await res.text();
+            lines.push(
+              `${label} | ${profileName} -> ${res.status} ${body.slice(0, 40).replace(/\s+/g, " ")}`,
+            );
+            if (res.ok) break;
+          } catch (error) {
+            lines.push(`${label} | ${profileName} -> ERR ${String(error).slice(0, 40)}`);
+          }
+        }
+      }
+      return new Response(lines.join("\n"), {
+        headers: { ...cors, "Content-Type": "text/plain; charset=utf-8" },
+      });
+    }
+
     const rule = ROUTES.find((entry) => url.pathname.startsWith(entry.prefix));
     if (!rule) {
       return json({ error: "unknown_route" }, 404, cors);

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { PriceChart, type ChartLine } from "@/components/chart/PriceChart";
 import { ErrorState, PercentText, Spinner, StarButton } from "@/components/ui";
 import { useI18n } from "@/hooks/useI18n";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useMarketStore } from "@/stores/marketStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
@@ -22,6 +23,7 @@ const MARKET_FROM_ROUTE: Record<string, MarketId> = {
 export function ChartPage() {
   const params = useParams();
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const market = MARKET_FROM_ROUTE[params.market ?? ""] ?? "spot";
   const symbolId = decodeURIComponent(params.symbol ?? "");
 
@@ -136,10 +138,15 @@ export function ChartPage() {
 
   return (
     <div className="flex-1 min-h-0 flex flex-col">
-      <div className="shrink-0 border-b border-line bg-panel px-2 sm:px-3 py-2 flex flex-wrap items-center gap-3">
+      <div
+        className={`shrink-0 border-b border-line bg-panel px-2 sm:px-3 py-2 ${
+          isMobile ? "flex flex-col gap-2" : "flex flex-wrap items-center gap-3"
+        }`}
+      >
+        <div className={`flex items-center gap-2 ${isMobile ? "" : "gap-3"}`}>
         <Link
           to={market === "futures" ? "/perp" : market === "alpha" ? "/alpha" : "/spot"}
-          className="cr-btn cr-btn-icon"
+          className="cr-btn cr-btn-icon shrink-0"
           aria-label={t("common.back")}
         >
           ←
@@ -166,13 +173,26 @@ export function ChartPage() {
           </div>
         </div>
 
-        <div className="ml-auto flex items-center gap-2 flex-wrap">
-          <div className="flex items-center gap-0.5" role="group" aria-label={t("chart.period")}>
+        <StarButton
+          active={isWatched}
+          onClick={toggleWatch}
+          label={isWatched ? t("chart.inWatchlist") : t("chart.addToWatchlist")}
+        />
+        </div>
+
+        <div className={`flex items-center gap-2 ${isMobile ? "w-full" : "ml-auto flex-wrap"}`}>
+          <div
+            className={`flex items-center gap-0.5 ${
+              isMobile ? "overflow-x-auto cr-scroll flex-1 min-w-0" : ""
+            }`}
+            role="group"
+            aria-label={t("chart.period")}
+          >
             {INTERVALS.map((value) => (
               <button
                 key={value}
                 type="button"
-                className={`cr-tab ${interval === value ? "cr-tab-active" : ""}`}
+                className={`cr-tab shrink-0 ${interval === value ? "cr-tab-active" : ""}`}
                 onClick={() => setIntervalSetting(value)}
                 data-testid={`interval-${value}`}
               >
@@ -181,12 +201,14 @@ export function ChartPage() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1" role="group" aria-label={t("chart.indicators")}>
+          <div className={`flex items-center gap-1 ${isMobile ? "shrink-0" : ""}`} role="group" aria-label={t("chart.indicators")}>
             {(["ma", "ema", "rsi", "macd"] as const).map((key) => (
               <button
                 key={key}
                 type="button"
-                className={`cr-chip ${indicators[key] ? "border-accent/50 text-accent" : "text-muted"}`}
+                className={`cr-chip shrink-0 ${
+                  indicators[key] ? "border-accent text-accent" : "text-muted"
+                }`}
                 onClick={() => setIndicator(key, !indicators[key])}
                 data-testid={`indicator-${key}`}
               >
@@ -194,12 +216,6 @@ export function ChartPage() {
               </button>
             ))}
           </div>
-
-          <StarButton
-            active={isWatched}
-            onClick={toggleWatch}
-            label={isWatched ? t("chart.inWatchlist") : t("chart.addToWatchlist")}
-          />
         </div>
       </div>
 
@@ -218,7 +234,7 @@ export function ChartPage() {
               <PriceChart
                 candles={candles}
                 lines={chartLines}
-                height={420}
+                height={isMobile ? 300 : 420}
                 onCrosshair={setCrosshair}
               />
             </div>

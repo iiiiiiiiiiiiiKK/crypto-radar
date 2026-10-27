@@ -33,6 +33,8 @@ export const UPSTREAM = {
       "https://fapi4.binance.com",
       "https://dstream.binance.com",
       "https://www.binance.com",
+      // The data mirror serves the same v1 API from a separate edge.
+      "https://data-api.binance.vision",
     ],
     ws: import.meta.env.VITE_FUTURES_WS_BASE ?? "wss://fstream.binance.com",
     prefix: "/fapi/v1",

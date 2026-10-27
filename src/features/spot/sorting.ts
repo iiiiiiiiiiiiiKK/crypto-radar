@@ -1,19 +1,7 @@
 import type { MarketTicker } from "@/types/market";
-import type { SortState } from "@/types/ui";
+import type { SortKey, SortState } from "@/types/ui";
 
-export type SortKey =
-  | "symbol"
-  | "price"
-  | "changePercent"
-  | "high24h"
-  | "low24h"
-  | "volume24h"
-  | "quoteVolume24h"
-  | "bidPrice"
-  | "markPrice"
-  | "fundingRate"
-  | "openInterest"
-  | "updatedAt";
+export type { SortKey };
 
 function valueOf(ticker: MarketTicker, key: SortKey): number | string {
   switch (key) {

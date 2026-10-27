@@ -1,0 +1,11 @@
+{
+  "name": "crypto-radar-diag",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "^3.99.0"
+  }
+}

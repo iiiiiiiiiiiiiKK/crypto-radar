@@ -111,12 +111,15 @@ test("perpetual market shows futures-only data", async ({ page }) => {
   expect(symbols.length).toBeGreaterThan(0);
   expect(symbols[0]).toMatch(/USDT|USDC|BUSD/);
 
-  // Funding rate is a real futures field — it must appear once enabled.
-  await page.getByTestId("open-columns").click();
-  await expect(page.getByTestId("column-fundingRate")).toBeVisible();
-  await page.getByTestId("column-fundingRate").check();
-  await page.keyboard.press("Escape");
-  await page.waitForTimeout(2500);
+  // Funding rate is a real futures field — it must appear on both layouts.
+  const isPhone = page.viewportSize()!.width < 768;
+  if (!isPhone) {
+    await page.getByTestId("open-columns").click();
+    await expect(page.getByTestId("column-fundingRate")).toBeVisible();
+    await page.getByTestId("column-fundingRate").check();
+    await page.keyboard.press("Escape");
+    await page.waitForTimeout(2500);
+  }
 
   const row = await page.getByTestId("market-row").first().innerText();
   expect(row).toMatch(/-?\d+\.\d{4}%/);

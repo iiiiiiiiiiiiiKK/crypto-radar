@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Modal } from "@/components/ui";
 import { useI18n } from "@/hooks/useI18n";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { topMovers, topVolume } from "@/features/spot/sorting";
 import type { MarketTicker } from "@/types/market";
 import type { TableDensity } from "@/types/ui";
@@ -47,6 +48,7 @@ export function MarketToolbar({
   onActiveListChange,
 }: MarketToolbarProps) {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const [columnsOpen, setColumnsOpen] = useState(false);
   const [board, setBoard] = useState<Board>("all");
 
@@ -77,6 +79,91 @@ export function MarketToolbar({
     order.splice(target, 0, moved);
     onColumnOrderChange(order);
   };
+
+  if (isMobile) {
+    return (
+      <div className="shrink-0 border-b border-line bg-panel">
+        <div className="flex items-center gap-1.5 px-2 h-9 overflow-x-auto cr-scroll">
+          <div className="flex items-center gap-0.5 shrink-0">
+            {(["all", "gainers", "losers", "volume"] as Board[]).map((item) => (
+              <button
+                key={item}
+                type="button"
+                className={`cr-tab shrink-0 ${board === item ? "cr-tab-active" : ""}`}
+                onClick={() => setBoard(item)}
+                data-testid={`board-${item}`}
+              >
+                {item === "all"
+                  ? t("market.all")
+                  : item === "gainers"
+                    ? t("market.topGainers")
+                    : item === "losers"
+                      ? t("market.topLosers")
+                      : t("market.topVolume")}
+              </button>
+            ))}
+          </div>
+
+          <div className="w-px h-4 bg-line shrink-0" />
+
+          <select
+            className="cr-select shrink-0 max-w-[120px]"
+            value={quoteFilter}
+            onChange={(event) => onQuoteFilterChange(event.target.value as QuoteFilter)}
+            aria-label={t("market.quoteFilter")}
+            data-testid="quote-filter"
+          >
+            <option value="all">{t("market.quoteAll")}</option>
+            <option value="usdt">{t("market.quoteUsdt")}</option>
+            <option value="usd">{t("market.quoteUsd")}</option>
+          </select>
+
+          <button
+            type="button"
+            className="cr-btn cr-btn-icon shrink-0"
+            onClick={() => setColumnsOpen(true)}
+            aria-label={t("market.columns")}
+            data-testid="open-columns"
+          >
+            ⋮
+          </button>
+
+          <button
+            type="button"
+            className="cr-btn cr-btn-icon shrink-0 ml-auto"
+            onClick={onRefresh}
+            title={t("market.refresh")}
+            aria-label={t("market.refresh")}
+          >
+            ⟳
+          </button>
+        </div>
+        <Modal open={columnsOpen} title={t("market.columns")} onClose={() => setColumnsOpen(false)}>
+          <div className="flex flex-col gap-1">
+            {orderedColumns.map((column) => (
+              <label
+                key={column.id}
+                className="flex items-center justify-between gap-3 py-1.5 text-xs cursor-pointer"
+              >
+                <span className="truncate">{t(column.labelKey)}</span>
+                <input
+                  type="checkbox"
+                  checked={visibleColumns.includes(column.id)}
+                  onChange={() => onToggleColumn(column.id)}
+                  className="accent-[#B8F36B] w-4 h-4"
+                  data-testid={`column-${column.id}`}
+                />
+              </label>
+            ))}
+            <div className="mt-3 pt-2 border-t border-line text-2xs text-faint">
+              {t("market.source")}: Binance ·{" "}
+              {lastUpdated ? new Date(lastUpdated).toLocaleTimeString("en-GB", { hour12: false }) : "--"}
+            </div>
+          </div>
+        </Modal>
+      </div>
+    );
+  }
 
   return (
     <div className="shrink-0 border-b border-line bg-panel px-2 py-1.5 flex flex-wrap items-center gap-2">

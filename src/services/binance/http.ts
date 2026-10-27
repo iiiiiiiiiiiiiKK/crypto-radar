@@ -19,6 +19,17 @@ export class BinanceRateLimitError extends BinanceHttpError {
   }
 }
 
+/**
+ * The exchange refuses the request because of the client IP (HTTP 418/429 for
+ * a rate limited IP, HTTP 451/403 for a blocked region or a datacenter IP).
+ */
+export class BinanceBlockedError extends BinanceHttpError {
+  constructor(status: number, path: string, body: string) {
+    super(status, path, body);
+    this.name = "BinanceBlockedError";
+  }
+}
+
 export interface RequestOptions {
   timeoutMs?: number;
   signal?: AbortSignal;
@@ -63,6 +74,15 @@ export async function fetchJson<T>(route: ApiRoute, options: RequestOptions = {}
         if (response.status === 418 || response.status === 429) {
           // This host is rate limiting us — try the next hostname instead.
           lastError = new BinanceRateLimitError(response.status, route.path, text.slice(0, 300));
+          if (attempt < retries) {
+            await sleep(200 * (attempt + 1));
+            continue;
+          }
+          throw lastError;
+        }
+        if (response.status === 403 || response.status === 451) {
+          // The edge refuses this client (blocked region or datacenter IP).
+          lastError = new BinanceBlockedError(response.status, route.path, text.slice(0, 300));
           if (attempt < retries) {
             await sleep(200 * (attempt + 1));
             continue;

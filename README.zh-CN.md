@@ -26,6 +26,7 @@ Crypto Radar 是一个真实可用的行情监控工具，不是静态演示。�
 | **自选列表** | 支持多个列表，新增/删除/重命名/排序，使用 localStorage 持久化，并对损坏数据做安全降级。 |
 | **异动扫描器** | 同时扫描现货、永续与 Alpha 三个市场，用虚拟滚动表格展示异动结果：大幅上涨、大幅下跌、高成交额、资金费率偏高、短时异动以及自定义规则。 |
 | **中英双语** | 统一的国际化字典驱动全部文案，语言选择持久化保存。 |
+| **手机端专属设计** | 手机上不是把桌面版缩小：行情改为卡片列表，顶栏拆为两行，市场切换与底部导航独立排布，图表与异动结果同样有专门的手机布局。 |
 
 ## 界面截图
 
@@ -37,9 +38,17 @@ Crypto Radar 是一个真实可用的行情监控工具，不是静态演示。�
 | --- | --- |
 | ![Alpha 代币](docs/screenshots/alpha.png) | ![K 线图表](docs/screenshots/chart.png) |
 
-| 异动扫描 | 移动端 |
+| 异动扫描 | 手机端 |
 | --- | --- |
-| ![异动扫描](docs/screenshots/screener.png) | ![移动端布局](docs/screenshots/mobile.png) |
+| ![异动扫描](docs/screenshots/screener.png) | ![手机端行情](docs/screenshots/mobile-spot.png) |
+
+| 手机端 — 现货 | 手机端 — K 线 |
+| --- | --- |
+| ![手机端现货](docs/screenshots/mobile-spot.png) | ![手机端K线](docs/screenshots/mobile-chart.png) |
+
+| 手机端 — Alpha | 手机端 — 异动扫描 |
+| --- | --- |
+| ![手机端Alpha](docs/screenshots/mobile-alpha.png) | ![手机端异动扫描](docs/screenshots/mobile-screener.png) |
 
 ## 数据来源
 
@@ -90,6 +99,9 @@ npm run dev
 | `npm run lint` | ESLint 检查，不允许任何警告 |
 | `npm run test` | Vitest 单元测试 |
 | `npm run test:e2e` | Playwright 端到端测试（使用真实行情） |
+| `npm run audit:layout` | 在 5 种设备尺寸上检查每个页面的溢出与截断 |
+| `npm run verify:live` | 用真实接口驱动线上站点 |
+| `npm run screenshots` | 生成桌面端与手机端截图 |
 | `npm run verify` | typecheck → lint → test → build |
 
 ### 环境变量

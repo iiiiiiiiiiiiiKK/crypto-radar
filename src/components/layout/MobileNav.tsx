@@ -22,7 +22,8 @@ export function MobileNav() {
   const { t } = useI18n();
   return (
     <nav
-      className="md:hidden shrink-0 border-t border-line bg-panel flex items-stretch overflow-x-auto"
+      className="md:hidden shrink-0 border-t border-line bg-panel flex items-stretch overflow-x-auto
+        cr-scroll"
       aria-label="Primary mobile"
     >
       {ITEMS.map((item) => (
@@ -31,13 +32,14 @@ export function MobileNav() {
           to={item.to}
           end={item.end}
           className={({ isActive }) =>
-            `flex-1 min-w-[56px] flex flex-col items-center justify-center gap-0.5 py-1.5 text-2xs ${
-              isActive ? "text-accent" : "text-muted"
-            }`
+            `flex-1 min-w-[52px] shrink-0 flex flex-col items-center justify-center gap-0.5 py-1.5
+              text-2xs whitespace-nowrap ${
+                isActive ? "text-accent" : "text-muted"
+              }`
           }
         >
           <span className="text-sm leading-none">{item.icon}</span>
-          <span className="truncate max-w-full px-1">{t(item.key)}</span>
+          <span className="px-0.5 leading-tight">{t(item.key)}</span>
         </NavLink>
       ))}
     </nav>

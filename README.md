@@ -38,9 +38,17 @@ endpoints, and every screen reacts to a live WebSocket feed.
 | --- | --- |
 | ![Alpha tokens](docs/screenshots/alpha.png) | ![Chart](docs/screenshots/chart.png) |
 
-| Screener | Mobile |
+| Screener | Phone layout |
 | --- | --- |
-| ![Screener](docs/screenshots/screener.png) | ![Mobile layout](docs/screenshots/mobile.png) |
+| ![Screener](docs/screenshots/screener.png) | ![Phone layout](docs/screenshots/mobile-spot.png) |
+
+| Phone — spot | Phone — chart |
+| --- | --- |
+| ![Phone spot](docs/screenshots/mobile-spot.png) | ![Phone chart](docs/screenshots/mobile-chart.png) |
+
+| Phone — Alpha | Phone — screener |
+| --- | --- |
+| ![Phone alpha](docs/screenshots/mobile-alpha.png) | ![Phone screener](docs/screenshots/mobile-screener.png) |
 
 ## Data sources
 
@@ -93,6 +101,9 @@ The dev server runs on <http://localhost:5173>.
 | `npm run lint` | ESLint, zero warnings tolerated |
 | `npm run test` | Vitest unit test suite |
 | `npm run test:e2e` | Playwright end-to-end suite (uses live data) |
+| `npm run audit:layout` | Check every page on five device profiles for overflow and clipping |
+| `npm run verify:live` | Drive the deployed site against the live API |
+| `npm run screenshots` | Capture the desktop and phone screenshots |
 | `npm run verify` | typecheck → lint → test → build |
 
 ### Environment variables

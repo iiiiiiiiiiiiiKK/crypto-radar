@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Modal } from "@/components/ui";
 import { useI18n } from "@/hooks/useI18n";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useMarketStore } from "@/stores/marketStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
 import { PercentText } from "@/components/ui";
@@ -15,6 +16,7 @@ const ROUTE_BY_MARKET: Record<string, string> = {
 
 export function WatchlistsPage() {
   const { t } = useI18n();
+  const isMobile = useIsMobile();
   const lists = useWatchlistStore((state) => state.lists);
   const activeListId = useWatchlistStore((state) => state.activeListId);
   const setActiveList = useWatchlistStore((state) => state.setActiveList);
@@ -62,13 +64,19 @@ export function WatchlistsPage() {
         <span className="ml-auto text-2xs text-faint">{lists.length} lists</span>
       </div>
 
-      <div className="flex-1 min-h-0 flex overflow-hidden">
-        <aside className="w-[190px] shrink-0 border-r border-line bg-panel overflow-y-auto cr-scroll">
+      <div className={`flex-1 min-h-0 flex overflow-hidden ${isMobile ? "flex-col" : ""}`}>
+        <aside
+          className={`shrink-0 border-line bg-panel cr-scroll ${
+            isMobile
+              ? "w-full border-b max-h-[136px] overflow-y-auto"
+              : "w-[190px] border-r overflow-y-auto"
+          }`}
+        >
           {lists.map((list, index) => (
             <div
               key={list.id}
               className={`flex items-center gap-1 px-2 h-8 border-b border-line-soft cursor-pointer ${
-                list.id === active?.id ? "bg-accent/10 text-accent" : "text-muted hover:text-text"
+                list.id === active?.id ? "bg-accent text-bg" : "text-muted hover:text-text"
               }`}
               onClick={() => setActiveList(list.id)}
             >
@@ -116,7 +124,7 @@ export function WatchlistsPage() {
           ))}
         </aside>
 
-        <div className="flex-1 min-w-0 overflow-auto cr-scroll">
+        <div className={`flex-1 min-w-0 overflow-auto cr-scroll ${isMobile ? "" : ""}`}>
           {!active ? (
             <p className="text-xs text-muted p-4">{t("watchlist.empty")}</p>
           ) : active.entries.length === 0 ? (

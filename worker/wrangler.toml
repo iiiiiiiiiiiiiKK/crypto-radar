@@ -5,6 +5,8 @@ compatibility_date = "2024-11-06"
 [vars]
 ALLOWED_ORIGINS = "*"
 UPSTREAM_TIMEOUT_MS = "12000"
+# Set to "1" temporarily to enable the /diag route.
+ENABLE_DIAGNOSTICS = ""
 
 [observability]
 enabled = false

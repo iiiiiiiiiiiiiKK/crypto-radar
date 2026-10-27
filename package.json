@@ -33,7 +33,9 @@
     "test:e2e": "playwright test",
     "verify:live": "node scripts/verify-live.mjs",
     "screenshots": "node scripts/capture-screenshots.mjs",
-    "verify": "npm run typecheck && npm run lint && npm run test && npm run build"
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "audit:layout": "node scripts/audit-layout.mjs",
+    "screenshots:mobile": "node scripts/capture-mobile.mjs"
   },
   "dependencies": {
     "@tanstack/react-virtual": "^3.10.9",

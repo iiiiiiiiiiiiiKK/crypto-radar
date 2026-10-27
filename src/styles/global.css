@@ -117,6 +117,8 @@
   .cr-tab {
     @apply inline-flex items-center h-7 px-2.5 rounded text-xs text-muted
       transition-colors duration-100 hover:text-text whitespace-nowrap;
+    /* A label must never be cut in half — the row scrolls instead. */
+    flex-shrink: 0;
   }
 
   .cr-tab-active {

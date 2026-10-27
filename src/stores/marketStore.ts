@@ -109,11 +109,30 @@ async function startFeed(
     },
     onError: (error) => {
       if (get().market !== market) return;
-      set({ error: error.message, loading: false });
+      set({ error: describeError(error), loading: false });
     },
   });
   set({ feed });
   await feed.start();
+}
+
+/**
+ * Turns a transport failure into a message the user can act on.
+ * The exchange rejects some networks and some IPs — that is not a bug in the
+ * application, so the message says so instead of showing a stack trace.
+ */
+function describeError(error: Error): string {
+  const status = /^Binance request failed \((\d+)\)/.exec(error.message)?.[1];
+  if (status === "418" || status === "429") {
+    return `Binance rate limited this network (HTTP ${status}). The client retries the other official hosts automatically — try again in a minute.`;
+  }
+  if (status === "403" || status === "451") {
+    return `Binance refused this network (HTTP ${status}). The perpetual API is not reachable from here; the spot and Alpha feeds keep working.`;
+  }
+  if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
+    return "The Binance API is unreachable from this network. Check the connection or use a proxy.";
+  }
+  return error.message;
 }
 
 export function marketKeyOf(market: MarketId, symbol: string): string {

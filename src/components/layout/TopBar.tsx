@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useI18n } from "@/hooks/useI18n";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useMarketStore } from "@/stores/marketStore";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
@@ -17,6 +18,7 @@ const MARKET_ROUTES: Record<MarketId, string> = {
 export function TopBar({ onSearchRef }: { onSearchRef?: (el: HTMLInputElement | null) => void }) {
   const { t, language, toggle } = useI18n();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const market = useMarketStore((state) => state.market);
   const state = useMarketStore((state) => state.state);
   const setMarket = useMarketStore((state) => state.setMarket);
@@ -35,6 +37,86 @@ export function TopBar({ onSearchRef }: { onSearchRef?: (el: HTMLInputElement | 
     setLastMarket(id);
     navigate(MARKET_ROUTES[id]);
   };
+
+  if (isMobile) {
+    return (
+      <header className="shrink-0 border-b border-line bg-panel">
+        <div className="h-[42px] flex items-center gap-2 px-2">
+          <span className="text-accent text-sm shrink-0 leading-none">◎</span>
+          <span className="text-2xs font-semibold tracking-wide text-text shrink-0">
+            CRYPTO RADAR
+          </span>
+
+          <div className="flex-1 min-w-0">
+            <div className="relative w-full">
+              <input
+                ref={inputRef}
+                id="global-search"
+                data-testid="global-search"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder={t("market.searchPlaceholder")}
+                className="cr-input pl-6"
+                autoComplete="off"
+                spellCheck={false}
+              />
+              <span className="absolute left-2 top-1/2 -translate-y-1/2 text-2xs text-faint pointer-events-none">
+                /
+              </span>
+            </div>
+          </div>
+
+          <a
+            href="https://x.com/0xkillcoin"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded border border-line bg-panel-2 text-muted transition-colors duration-100 hover:border-accent hover:text-accent"
+            aria-label={t("common.authorX")}
+            title={t("common.authorX")}
+            data-testid="author-x-link"
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+            </svg>
+          </a>
+
+          <ConnectionBadge state={state} compact />
+
+          <button
+            type="button"
+            className="cr-btn cr-btn-icon shrink-0"
+            onClick={toggle}
+            aria-label={t("settings.language")}
+            title={t("settings.language")}
+            data-testid="language-toggle"
+          >
+            {language === "zh" ? "中" : "EN"}
+          </button>
+        </div>
+
+        <nav
+          className="flex items-center gap-0.5 px-1.5 h-8 overflow-x-auto cr-scroll border-t border-line-soft"
+          aria-label="Market"
+        >
+          {MARKET_IDS.map((id) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => onPick(id)}
+              className={`cr-tab shrink-0 px-2.5 ${market === id ? "cr-tab-active" : ""}`}
+              aria-current={market === id ? "page" : undefined}
+            >
+              {t(`market.${id}`)}
+            </button>
+          ))}
+          <span className="ml-auto shrink-0 text-2xs text-faint pr-1" data-testid="row-count-top">
+            {lastUpdated ? new Date(lastUpdated).toLocaleTimeString("en-GB", { hour12: false }) : "--"}
+          </span>
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <header className="h-[46px] shrink-0 border-b border-line bg-panel flex items-center gap-2 px-2 sm:px-3">
@@ -78,6 +160,19 @@ export function TopBar({ onSearchRef }: { onSearchRef?: (el: HTMLInputElement | 
         <span className="hidden lg:inline text-2xs text-faint truncate max-w-[140px]">
           {lastUpdated ? new Date(lastUpdated).toLocaleTimeString("en-GB", { hour12: false }) : "--"}
         </span>
+        <a
+          href="https://x.com/0xkillcoin"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center justify-center w-7 h-7 rounded border border-line bg-panel-2 text-xs text-muted transition-colors duration-100 hover:border-accent hover:text-accent"
+          aria-label={t("common.authorX")}
+          title={t("common.authorX")}
+          data-testid="author-x-link"
+        >
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+          </svg>
+        </a>
         <ConnectionBadge state={state} />
         <button
           type="button"

@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { ErrorState, EmptyState, PercentText, Spinner } from "@/components/ui";
 import { useI18n } from "@/hooks/useI18n";
+import { useIsMobile } from "@/hooks/useMediaQuery";
+import { MobileScreenerList } from "@/components/screener/MobileScreenerList";
 import { useWatchlistStore } from "@/stores/watchlistStore";
 import { useScreenerData } from "./useScreenerData";
 import { DEFAULT_RULES, runScreener, type ScreenerRules, type ScreenerTemplate } from "./rules";
@@ -20,6 +22,7 @@ const ROUTE_BY_MARKET: Record<MarketId, string> = {
 export function ScreenerPage() {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const watchlists = useWatchlistStore((state) => state.lists);
 
   const [rules, setRules] = useState<ScreenerRules>(DEFAULT_RULES);
@@ -100,7 +103,11 @@ export function ScreenerPage() {
           ))}
         </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-2">
+        <div
+          className={`grid gap-2 ${
+            isMobile ? "grid-cols-2" : "grid-cols-2 md:grid-cols-3 xl:grid-cols-6"
+          }`}
+        >
           {rules.template !== "volume" && rules.template !== "funding" ? (
             <label className="flex flex-col gap-1">
               <span className="cr-label">{t("screener.minChange")}</span>
@@ -219,6 +226,18 @@ export function ScreenerPage() {
           </div>
         ) : hits.length === 0 ? (
           <EmptyState title={t("screener.noMatches")} hint={t("screener.rules")} />
+        ) : isMobile ? (
+          <MobileScreenerList
+            hits={hits}
+            loading={loading}
+            error={error}
+            onRetry={refresh}
+            onOpen={(hit) =>
+              navigate(
+                `/chart/${ROUTE_BY_MARKET[hit.market]}/${encodeURIComponent(hit.symbol)}`,
+              )
+            }
+          />
         ) : (
           <div ref={scrollRef} className="h-full overflow-auto" data-testid="screener-table">
             <div className="sticky top-0 z-10 bg-panel">

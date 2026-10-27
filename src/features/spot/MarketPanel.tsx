@@ -1,10 +1,12 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMarketStore } from "@/stores/marketStore";
+import { useIsMobile } from "@/hooks/useMediaQuery";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { useUiStore } from "@/stores/uiStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
 import { MarketTable } from "@/components/market/MarketTable";
+import { MobileMarketList } from "@/components/market/MobileMarketList";
 import { MarketToolbar } from "@/components/market/MarketToolbar";
 import { filterByQuote, filterTickers, sortTickers, type QuoteFilter } from "./sorting";
 import { makeEntry } from "@/services/storage/watchlists";
@@ -20,6 +22,7 @@ const ROUTE_BY_MARKET: Record<MarketId, string> = {
 
 export function MarketPanel({ market }: { market: MarketId }) {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const tickers = useMarketStore((state) => state.tickers);
   const loading = useMarketStore((state) => state.loading);
   const error = useMarketStore((state) => state.error);
@@ -97,21 +100,36 @@ export function MarketPanel({ market }: { market: MarketId }) {
         activeListId={activeList?.id ?? null}
         onActiveListChange={setActiveList}
       />
-      <MarketTable
-        rows={rows}
-        market={market}
-        density={density}
-        visibleColumns={visibleColumns}
-        columnOrder={columnOrder}
-        sort={sort}
-        onSortChange={setSort}
-        watchedKeys={watchedKeys}
-        onToggleWatch={toggleWatch}
-        onOpenChart={openChart}
-        loading={loading}
-        error={error}
-        onRetry={() => void refresh()}
-      />
+      {isMobile ? (
+        <MobileMarketList
+          rows={rows}
+          market={market}
+          sort={sort}
+          onSortChange={setSort}
+          watchedKeys={watchedKeys}
+          onToggleWatch={toggleWatch}
+          onOpenChart={openChart}
+          loading={loading}
+          error={error}
+          onRetry={() => void refresh()}
+        />
+      ) : (
+        <MarketTable
+          rows={rows}
+          market={market}
+          density={density}
+          visibleColumns={visibleColumns}
+          columnOrder={columnOrder}
+          sort={sort}
+          onSortChange={setSort}
+          watchedKeys={watchedKeys}
+          onToggleWatch={toggleWatch}
+          onOpenChart={openChart}
+          loading={loading}
+          error={error}
+          onRetry={() => void refresh()}
+        />
+      )}
     </div>
   );
 }
