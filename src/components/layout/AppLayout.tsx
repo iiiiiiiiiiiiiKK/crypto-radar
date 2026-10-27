@@ -6,6 +6,7 @@ import { TopBar } from "./TopBar";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { useMarketStore } from "@/stores/marketStore";
 import { useAlertEngine } from "@/features/alerts/useAlertEngine";
+import { ThemeSync } from "./ThemeSync";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { MARKET_IDS } from "@/lib/constants/markets";
 import type { MarketId } from "@/types/market";
@@ -55,6 +56,7 @@ export function AppLayout() {
 
   return (
     <div className="h-full flex flex-col bg-bg">
+      <ThemeSync />
       <TopBar onSearchRef={(el) => (searchRef.current = el)} />
       <div className="flex-1 min-h-0 flex">
         <Sidebar />

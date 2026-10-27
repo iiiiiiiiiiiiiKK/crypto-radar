@@ -2,7 +2,7 @@
 
 # ◎ Crypto Radar
 
-**面向 Binance 现货、U 本位永续合约与 Alpha 代币的专业实时行情终端。**
+**一个带性格的 Meme 加密市场作战室。** 真实的 Binance 行情 + 像素 HUD 终端皮肤 + 可解释的市场情绪 + 游戏化竞技场 + 实时事件流 + 一键 Meme 卡片生成。
 
 [English](README.md) · [中文](README.zh-CN.md) · [在线演示](https://iiiiiiiiiiiiiKK.github.io/crypto-radar/) · [X](https://x.com/0xkillcoin)
 
@@ -10,7 +10,8 @@
 
 ---
 
-Crypto Radar 是一个真实可用的行情监控工具，不是静态演示。所有价格、成交量、资金费率
+Crypto Radar 2.0 是一个真实可用的行情监控工具，而且有鲜明的性格，不是静态演示。
+所有价格、成交量、资金费率
 和 K 线都来自 Binance 官方公开接口，所有页面都通过 WebSocket 实时刷新。
 
 ![Crypto Radar 行情总览](docs/screenshots/overview.png)
@@ -32,6 +33,20 @@ Crypto Radar 是一个真实可用的行情监控工具，不是静态演示。�
 | **24h 区间条** | 每一行都能看到现价在 24 小时最低—最高之间的位置。 |
 | **中英双语** | 统一的国际化字典驱动全部文案，语言选择持久化保存。 |
 | **手机端专属设计** | 手机上不是把桌面版缩小：行情改为卡片列表，顶栏拆为两行，市场切换与底部导航独立排布，图表与异动结果同样有专门的手机布局。 |
+
+## Meme 2.0 的新界面
+
+| 首页（情绪 + 竞技场 + 事件） | 竞技场 |
+| --- | --- |
+| ![首页](docs/screenshots/home.png) | ![竞技场](docs/screenshots/arena.png) |
+
+| 异动事件中心 | Meme Studio |
+| --- | --- |
+| ![事件中心](docs/screenshots/events.png) | ![Meme Studio](docs/screenshots/studio.png) |
+
+| 交易员基地 | 手机端 |
+| --- | --- |
+| ![交易员基地](docs/screenshots/profile.png) | ![手机首页](docs/screenshots/mobile-home.png) |
 
 ## 界面截图
 
@@ -80,6 +95,22 @@ Crypto Radar 是一个真实可用的行情监控工具，不是静态演示。�
 对任意现货／永续／Alpha 交易对设置阈值（高于 / 低于）。终端开着时引擎持续比对
 实时行情，触发即发浏览器通知，并自动停用该条规则避免刷屏；规则存在
 `localStorage`，刷新后依然在。
+
+## 路由
+
+| 路由 | 说明 |
+| --- | --- |
+| `/` | 作战室：情绪仪表盘、竞技场、事件流，可切到全量表格或热力图 |
+| `/spot` `/perp` `/alpha` | 各市场的完整行情表 |
+| `/chart/:market/:symbol` | K 线、成交量、价格轴上的 MA/EMA、独立副图的 RSI 与 MACD |
+| `/events` | 异动事件中心，可按规则/严重度筛选、可改阈值 |
+| `/studio` | Meme Studio：用真实行情出图并导出 PNG |
+| `/basis` | 跨市场基差雷达 |
+| `/screener` | 异动扫描 |
+| `/alerts` | 价格预警 |
+| `/watchlists` | 自选列表 |
+| `/profile` | 交易员基地：主题、像素头像、默认首页视图 |
+| `/settings` | 偏好设置 |
 
 ## 数据来源
 

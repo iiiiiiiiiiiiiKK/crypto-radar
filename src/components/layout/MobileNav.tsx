@@ -14,20 +14,26 @@ const PRIMARY: NavItem[] = [
   { to: "/", key: "nav.overview", icon: "◧", end: true },
   { to: "/spot", key: "nav.spot", icon: "◆" },
   { to: "/perp", key: "nav.futures", icon: "⬢" },
-  { to: "/alpha", key: "nav.alpha", icon: "◈" },
+  { to: "/events", key: "nav.events", icon: "⚡" },
 ];
 
 const MORE: NavItem[] = [
+  { to: "/alpha", key: "nav.alpha", icon: "◈" },
   { to: "/basis", key: "nav.basis", icon: "⇄" },
-  { to: "/screener", key: "nav.screener", icon: "⚡" },
+  { to: "/studio", key: "nav.studio", icon: "✎" },
+  { to: "/screener", key: "nav.screener", icon: "◎" },
   { to: "/alerts", key: "nav.alerts", icon: "◔" },
   { to: "/watchlists", key: "nav.watchlists", icon: "☆" },
+  { to: "/profile", key: "nav.profile", icon: "☗" },
   { to: "/settings", key: "nav.settings", icon: "⚙" },
 ];
 
 /**
- * Phone navigation: four primary destinations plus a sheet with the rest, so
- * every label stays readable instead of squeezing nine items into one row.
+ * Phone navigation.
+ *
+ * A pixel HUD bar with four destinations and a sheet for the rest. The bar
+ * respects the iPhone home indicator area so the last list row is never
+ * covered by it — the shell reserves this height.
  */
 export function MobileNav() {
   const { t } = useI18n();
@@ -37,8 +43,9 @@ export function MobileNav() {
   return (
     <>
       <nav
-        className="md:hidden shrink-0 border-t border-line bg-panel flex items-stretch"
+        className="md:hidden shrink-0 bg-panel border-t border-line flex items-stretch safe-bottom"
         aria-label="Primary mobile"
+        data-testid="mobile-nav"
       >
         {PRIMARY.map((item) => (
           <NavLink
@@ -46,22 +53,33 @@ export function MobileNav() {
             to={item.to}
             end={item.end}
             className={({ isActive }) =>
-              `flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 text-2xs whitespace-nowrap ${isActive ? "text-accent" : "text-muted"}`
+              `relative flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 ${isActive ? "text-accent" : "text-muted"}`
             }
           >
-            <span className="text-sm leading-none">{item.icon}</span>
-            <span className="px-0.5 leading-tight truncate max-w-full">{t(item.key)}</span>
+            {({ isActive }) => (
+              <>
+                {isActive ? (
+                  <span className="absolute top-0 left-1/2 -translate-x-1/2 w-6 h-[2px] bg-accent" />
+                ) : null}
+                <span className="text-[15px] leading-none">{item.icon}</span>
+                <span className="font-pixel text-[10px] leading-tight tracking-wider truncate max-w-full px-0.5">
+                  {t(item.key)}
+                </span>
+              </>
+            )}
           </NavLink>
         ))}
         <button
           type="button"
           onClick={() => setMoreOpen(true)}
-          className="flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 text-2xs text-muted"
+          className="relative flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-1.5 text-muted"
           data-testid="mobile-more"
           aria-label={t("nav.more")}
         >
-          <span className="text-sm leading-none">⋯</span>
-          <span className="px-0.5 leading-tight truncate max-w-full">{t("nav.more")}</span>
+          <span className="text-[15px] leading-none">⋯</span>
+          <span className="font-pixel text-[10px] leading-tight tracking-wider truncate max-w-full px-0.5">
+            {t("nav.more")}
+          </span>
         </button>
       </nav>
 

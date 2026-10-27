@@ -26,10 +26,13 @@ const PAGES = [
   "spot",
   "perp",
   "alpha",
+  "events",
   "basis",
+  "studio",
   "screener",
   "alerts",
   "watchlists",
+  "profile",
   "settings",
 ];
 

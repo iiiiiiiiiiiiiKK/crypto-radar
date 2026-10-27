@@ -127,7 +127,7 @@ export function MobileMarketList({
                         className="flex-1 min-w-0"
                       />
                       <span className="cr-mono text-2xs text-faint w-[52px] text-right shrink-0">
-                        {formatCompact(row.quoteVolume24h)}
+                        {row.quoteVolume24h === null ? "--" : formatCompact(row.quoteVolume24h)}
                       </span>
                     </div>
 

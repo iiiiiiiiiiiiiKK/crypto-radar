@@ -1,42 +1,68 @@
+/* ==========================================================================
+   Crypto Radar — Meme 作战室设计令牌
+   --------------------------------------------------------------------------
+   三种语汇并存，但各有严格用途：
+   · 赛博终端  → 面板、边框、数字（冷静、高密度）
+   · 像素 HUD  → 标题、名次、状态徽章（切角、硬阴影）
+   · 互联网漫画 → 贴纸、事件卡（描边、轻微旋转）
+
+   颜色只通过变量使用，组件里不允许出现裸十六进制值。
+   ========================================================================== */
+
 :root {
-  --cr-bg: 8 13 12;
-  --cr-panel: 15 23 21;
-  --cr-panel-2: 20 31 28;
-  --cr-panel-3: 25 37 33;
-  --cr-line: 39 53 48;
-  --cr-line-soft: 29 40 37;
-  --cr-accent: 184 243 107;
-  --cr-up: 34 201 131;
-  --cr-down: 240 82 96;
-  --cr-cyan: 92 207 192;
-  --cr-text: 231 239 235;
-  --cr-muted: 143 162 154;
-  --cr-faint: 93 111 104;
-  --cr-warn: 240 182 94;
+  /* 基底：比纯黑偏蓝，荧光色才有对比 */
+  --cr-bg: 7 8 13;
+  --cr-bg-2: 10 12 19;
+  --cr-panel: 14 16 24;
+  --cr-panel-2: 20 24 38;
+  --cr-panel-3: 26 31 48;
+  --cr-line: 35 42 61;
+  --cr-line-soft: 26 31 45;
 
-  --cr-bg-hex: #080d0c;
-  --cr-panel-hex: #0f1715;
-  --cr-panel-2-hex: #141f1c;
-  --cr-line-hex: #273530;
-  --cr-accent-hex: #b8f36b;
-  --cr-up-hex: #22c983;
-  --cr-down-hex: #f05260;
-  --cr-cyan-hex: #5ccfc0;
-  --cr-text-hex: #e7efeb;
-  --cr-muted-hex: #8fa29a;
-  --cr-faint-hex: #5d6f68;
-  --cr-warn-hex: #f0b65e;
+  /* 霓虹：仅用于强调、选中与关键操作 */
+  --cr-accent: 57 255 136;
+  --cr-up: 57 255 136;
+  --cr-down: 255 59 107;
+  --cr-voltage: 177 76 255;
+  --cr-warn: 255 233 74;
+  --cr-cyan: 51 225 255;
 
-  --cr-radius-sm: 3px;
-  --cr-radius: 5px;
-  --cr-radius-md: 7px;
-  --cr-radius-lg: 10px;
+  --cr-text: 232 238 252;
+  --cr-muted: 125 135 158;
+  --cr-faint: 84 93 117;
 
-  --cr-header-h: 46px;
-  --cr-sidebar-w: 168px;
-  --cr-sidebar-w-collapsed: 52px;
-  --cr-right-w: 296px;
+  /* 直接引用的十六进制别名（用于 box-shadow / clip-path 等场景） */
+  --cr-bg-hex: #07080d;
+  --cr-panel-hex: #0e1018;
+  --cr-panel-2-hex: #141826;
+  --cr-line-hex: #232a3d;
+  --cr-accent-hex: #39ff88;
+  --cr-up-hex: #39ff88;
+  --cr-down-hex: #ff3b6b;
+  --cr-voltage-hex: #b14cff;
+  --cr-warn-hex: #ffe94a;
+  --cr-cyan-hex: #33e1ff;
+  --cr-text-hex: #e8eefc;
+  --cr-muted-hex: #7d879e;
+  --cr-faint-hex: #545d75;
 
-  --cr-font-mono: "JetBrains Mono", "SFMono-Regular", Menlo, Consolas, "Roboto Mono", monospace;
-  --cr-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+  /* 圆角克制：HUD 面板靠切角，不靠大圆角 */
+  --cr-radius-sm: 2px;
+  --cr-radius: 3px;
+  --cr-radius-md: 4px;
+
+  --cr-header-h: 48px;
+  --cr-sidebar-w: 184px;
+  --cr-sidebar-w-collapsed: 56px;
+  --cr-bottom-h: 54px;
+  --cr-safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  --cr-font-mono: "JetBrains Mono", "SFMono-Regular", "SF Mono", Menlo, Consolas,
+    "Roboto Mono", monospace;
+  --cr-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  /* 像素/街机：不引入外部字体，用等宽 + 字距 + 硬阴影造出点阵感 */
+  --cr-font-pixel: "Courier New", ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --cr-scanline: rgba(57, 255, 136, 0.045);
 }

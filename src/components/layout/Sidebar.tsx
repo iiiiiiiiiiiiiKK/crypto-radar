@@ -14,10 +14,13 @@ const ITEMS: NavItem[] = [
   { to: "/spot", key: "nav.spot", icon: "◆" },
   { to: "/perp", key: "nav.futures", icon: "⬢" },
   { to: "/alpha", key: "nav.alpha", icon: "◈" },
+  { to: "/events", key: "nav.events", icon: "⚡" },
   { to: "/basis", key: "nav.basis", icon: "⇄" },
-  { to: "/screener", key: "nav.screener", icon: "⚡" },
+  { to: "/studio", key: "nav.studio", icon: "✎" },
+  { to: "/screener", key: "nav.screener", icon: "◎" },
   { to: "/alerts", key: "nav.alerts", icon: "◔" },
   { to: "/watchlists", key: "nav.watchlists", icon: "☆" },
+  { to: "/profile", key: "nav.profile", icon: "☗" },
   { to: "/settings", key: "nav.settings", icon: "⚙" },
 ];
 
@@ -33,10 +36,10 @@ export function Sidebar() {
       }`}
     >
       <div className="h-[46px] flex items-center gap-2 px-3 border-b border-line shrink-0 overflow-hidden">
-        <span className="text-accent text-base leading-none shrink-0">◎</span>
+        <span className="text-accent text-base leading-none shrink-0 glitch">◎</span>
         {!collapsed ? (
           <div className="min-w-0">
-            <div className="text-xs font-semibold tracking-wide truncate">CRYPTO RADAR</div>
+            <div className="pixel-title text-2xs truncate">CRYPTO RADAR</div>
             <div className="text-2xs text-faint truncate">{t("appTagline")}</div>
           </div>
         ) : null}
@@ -50,10 +53,10 @@ export function Sidebar() {
             end={item.end}
             title={t(item.key)}
             className={({ isActive }) =>
-              `flex items-center gap-2.5 h-8 mx-1.5 mb-0.5 px-2 rounded text-xs transition-colors ${
+              `flex items-center gap-2.5 h-8 mx-1.5 mb-0.5 px-2 text-xs transition-colors border-l-2 ${
                 isActive
-                  ? "bg-accent/12 text-accent"
-                  : "text-muted hover:text-text hover:bg-panel-2"
+                  ? "border-accent bg-accent/10 text-accent"
+                  : "border-transparent text-muted hover:text-text hover:bg-panel-2"
               }`
             }
           >

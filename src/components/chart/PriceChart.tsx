@@ -24,6 +24,10 @@ export interface PriceChartProps {
   volume?: boolean;
   height?: number;
   onCrosshair?: (candle: Candle | null) => void;
+  /** Called once the chart exists so sibling panes can sync their time scale. */
+  onReady?: (chart: IChartApi) => void;
+  /** Optional fixed right price scale width so panes line up. */
+  rightPriceScaleWidth?: number;
 }
 
 /**
@@ -37,6 +41,7 @@ export function PriceChart({
   volume = true,
   height = 420,
   onCrosshair,
+  onReady,
 }: PriceChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -134,6 +139,7 @@ export function PriceChart({
 
     chartRef.current = chart;
     setReady(true);
+    onReady?.(chart);
 
     const lineSeries = lineSeriesRef.current;
     return () => {

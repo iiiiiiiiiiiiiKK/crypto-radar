@@ -4,7 +4,7 @@ import { useI18n } from "@/hooks/useI18n";
 const DOT_CLASS: Record<ConnectionState, string> = {
   idle: "bg-faint",
   connecting: "bg-warn animate-pulse",
-  connected: "bg-up",
+  connected: "bg-up shadow-[0_0_6px_rgba(57,255,136,0.9)]",
   reconnecting: "bg-warn animate-pulse",
   disconnected: "bg-down",
   stale: "bg-warn animate-pulse",

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { DEFAULT_SETTINGS, loadSettings, saveSettings } from "@/services/storage/settings";
-import type { AppSettings } from "@/services/storage/settings";
+import type { AppSettings, HomeView, ThemeId } from "@/services/storage/settings";
 import type { ColumnVisibility, TableDensity } from "@/types/ui";
 import type { Language } from "@/types/market";
 
@@ -13,6 +13,9 @@ interface SettingsState extends AppSettings {
   setIndicatorParam: (key: "ma" | "ema" | "rsi", value: number) => void;
   setInterval: (interval: string) => void;
   setLastMarket: (market: string) => void;
+  setHomeView: (view: HomeView) => void;
+  setTheme: (theme: ThemeId) => void;
+  setAvatar: (avatar: string) => void;
   reset: () => void;
 }
 
@@ -29,6 +32,9 @@ function persist(state: SettingsState): void {
     indicatorParams: state.indicatorParams,
     interval: state.interval,
     lastMarket: state.lastMarket,
+    homeView: state.homeView,
+    theme: state.theme,
+    avatar: state.avatar,
   };
   saveSettings(snapshot);
 }
@@ -79,6 +85,18 @@ export const useSettingsStore = create<SettingsState>((set, get) => ({
   },
   setLastMarket: (lastMarket) => {
     set({ lastMarket });
+    persist(get());
+  },
+  setHomeView: (homeView) => {
+    set({ homeView });
+    persist(get());
+  },
+  setTheme: (theme) => {
+    set({ theme });
+    persist(get());
+  },
+  setAvatar: (avatar) => {
+    set({ avatar });
     persist(get());
   },
   reset: () => {

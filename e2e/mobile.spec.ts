@@ -58,6 +58,42 @@ test("phone chart keeps the interval and indicator controls reachable", async ({
   await expect(page.getByTestId("indicator-ma")).toBeVisible();
 });
 
+test("the bottom bar never covers the last market row", async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  await page.goto("spot");
+  await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
+
+  // Scroll to the end of the list and compare the last row with the nav top.
+  const result = await page.evaluate(() => {
+    const scroller = document.querySelector('[data-testid="market-table"]') as HTMLElement | null;
+    if (scroller) scroller.scrollTop = scroller.scrollHeight;
+    const nav = document.querySelector('[data-testid="mobile-nav"]') as HTMLElement | null;
+    const rows = document.querySelectorAll('[data-testid="market-row"]');
+    const last = rows[rows.length - 1] as HTMLElement | undefined;
+    return {
+      navTop: nav ? nav.getBoundingClientRect().top : window.innerHeight,
+      lastBottom: last ? last.getBoundingClientRect().bottom : 0,
+      rows: rows.length,
+    };
+  });
+  // The list must stop above the navigation bar, not underneath it.
+  expect(result.lastBottom).toBeLessThanOrEqual(result.navTop + 1);
+});
+
+test("dialogs stay inside the viewport", async ({ page }) => {
+  await page.setViewportSize(PHONE);
+  await page.goto("watchlists");
+  await page.getByRole("button", { name: /新建列表|New list/i }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog).toBeVisible();
+  const box = await dialog.boundingBox();
+  const viewport = page.viewportSize()!;
+  expect(box!.x).toBeGreaterThanOrEqual(0);
+  expect(box!.y).toBeGreaterThanOrEqual(0);
+  expect(box!.x + box!.width).toBeLessThanOrEqual(viewport.width + 1);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(viewport.height + 1);
+});
+
 test("the author X link points to the profile", async ({ page }) => {
   await page.goto("");
   const link = page.getByTestId("author-x-link");

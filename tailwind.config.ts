@@ -9,6 +9,7 @@ export default {
     extend: {
       colors: {
         bg: withAlpha("--cr-bg"),
+        "bg-2": withAlpha("--cr-bg-2"),
         panel: withAlpha("--cr-panel"),
         "panel-2": withAlpha("--cr-panel-2"),
         "panel-3": withAlpha("--cr-panel-3"),
@@ -17,6 +18,7 @@ export default {
         accent: withAlpha("--cr-accent"),
         up: withAlpha("--cr-up"),
         down: withAlpha("--cr-down"),
+        voltage: withAlpha("--cr-voltage"),
         cyan: withAlpha("--cr-cyan"),
         text: withAlpha("--cr-text"),
         muted: withAlpha("--cr-muted"),
@@ -24,8 +26,9 @@ export default {
         warn: withAlpha("--cr-warn"),
       },
       fontFamily: {
-        sans: ['"Inter"', "system-ui", "-apple-system", "Segoe UI", "Roboto", '"Noto Sans SC"', "sans-serif"],
-        mono: ['"JetBrains Mono"', "SFMono-Regular", "Menlo", "Consolas", '"Roboto Mono"', "monospace"],
+        sans: ["Inter", "system-ui", "-apple-system", "Segoe UI", "PingFang SC", "Microsoft YaHei", "sans-serif"],
+        mono: ['"JetBrains Mono"', "SFMono-Regular", "Menlo", "Consolas", "monospace"],
+        pixel: ['"Courier New"', "ui-monospace", "Menlo", "monospace"],
       },
       fontSize: {
         "2xs": ["10px", { lineHeight: "13px" }],
@@ -47,12 +50,12 @@ export default {
       },
       keyframes: {
         "flash-up": {
-          "0%": { backgroundColor: "rgba(34,201,131,0.32)" },
-          "100%": { backgroundColor: "rgba(34,201,131,0)" },
+          "0%": { backgroundColor: "rgba(57,255,136,0.30)" },
+          "100%": { backgroundColor: "rgba(57,255,136,0)" },
         },
         "flash-down": {
-          "0%": { backgroundColor: "rgba(240,82,96,0.32)" },
-          "100%": { backgroundColor: "rgba(240,82,96,0)" },
+          "0%": { backgroundColor: "rgba(255,59,107,0.30)" },
+          "100%": { backgroundColor: "rgba(255,59,107,0)" },
         },
         "fade-in": {
           "0%": { opacity: "0", transform: "translateY(4px)" },

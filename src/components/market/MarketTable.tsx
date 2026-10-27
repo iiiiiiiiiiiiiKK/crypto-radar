@@ -54,10 +54,14 @@ export function MarketTable({
       .filter((column): column is ColumnDefinition => Boolean(column));
     const rest = COLUMNS.filter((column) => !columnOrder.includes(column.id));
     // The trading pair itself is always shown — it is the anchor of the table.
+    // Columns that do not exist on this market are dropped instead of being
+    // rendered as "--".
     return [...fromOrder, ...rest].filter(
-      (column) => column.id === "symbol" || visibleColumns.includes(column.id),
+      (column) =>
+        (column.id === "symbol" || visibleColumns.includes(column.id)) &&
+        (!column.markets || column.markets.includes(market)),
     );
-  }, [columnOrder, visibleColumns]);
+  }, [columnOrder, visibleColumns, market]);
 
   useEffect(() => {
     const next: Record<string, "up" | "down"> = {};

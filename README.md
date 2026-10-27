@@ -2,7 +2,7 @@
 
 # ◎ Crypto Radar
 
-**A professional real-time crypto market terminal for Binance spot, USDⓈ-M perpetuals and Alpha tokens.**
+**A Meme-fuelled crypto war room.** Real Binance market data, a pixel-HUD terminal skin, a computed market mood, a game-style arena, an explainable event stream and a one-click meme card generator.
 
 [English](README.md) · [中文](README.zh-CN.md) · [Live demo](https://iiiiiiiiiiiiiKK.github.io/crypto-radar/) · [X](https://x.com/0xkillcoin)
 
@@ -10,9 +10,19 @@
 
 ---
 
-Crypto Radar is a working market monitor, not a mock-up. Every price, volume,
-funding rate and candle you see comes from the official public Binance
-endpoints, and every screen reacts to a live WebSocket feed.
+Crypto Radar 2.0 is a working market monitor with a personality, not a mock-up.
+Every price, volume, funding rate and candle comes from the official public
+Binance endpoints; every mood, ranking, event and card is computed from that
+same live data — nothing is generated at random.
+
+The redesign keeps the professional core (real feeds, real candles, real
+indicators) and rebuilds the presentation around three ideas:
+
+1. **The market has a mood** — a computed, explainable state (FOMO, greed,
+   chop, fear, panic, dead liquidity) instead of a bare table.
+2. **Rankings are a game** — a six-board arena built from live data.
+3. **Data is content** — the event stream narrates what just happened, and
+   Meme Studio turns a pair into a shareable PNG.
 
 ![Crypto Radar overview](docs/screenshots/overview.png)
 
@@ -20,6 +30,7 @@ endpoints, and every screen reacts to a live WebSocket feed.
 
 | Module | Highlights |
 | --- | --- |
+| **War-room home** | Mood dashboard, the arena and the event stream on the first screen, with the full table one switch away. |
 | **Market overview** | One dense table for spot, perpetuals and Alpha tokens. Search, sort on every column, show/hide columns, reorder columns, switch the row density and filter by quote asset. |
 | **Live prices** | One shared WebSocket per market (`!miniTicker@arr`) with batched 250 ms updates, price flash animations and an honest connection state. |
 | **Candlestick charts** | Lightweight Charts with volume, 15 intervals, historical paging, a live-updating last candle, crosshair OHLC readout and a price line. |
@@ -32,6 +43,20 @@ endpoints, and every screen reacts to a live WebSocket feed.
 | **Market breadth** | Advancers versus decliners drawn as a single stacked bar next to the leaderboard tabs. |
 | **24 h range bar** | Every row shows where the price sits between its 24 h low and high. |
 | **Bilingual UI** | Complete Chinese and English interfaces driven by one dictionary, with the choice persisted. |
+
+## Meme 2.0 surfaces
+
+| Home — mood, arena, events | Arena |
+| --- | --- |
+| ![Home](docs/screenshots/home.png) | ![Arena](docs/screenshots/arena.png) |
+
+| Event centre | Meme Studio |
+| --- | --- |
+| ![Events](docs/screenshots/events.png) | ![Studio](docs/screenshots/studio.png) |
+
+| Trader base | Phone |
+| --- | --- |
+| ![Profile](docs/screenshots/profile.png) | ![Phone home](docs/screenshots/mobile-home.png) |
 
 ## Screenshots
 
@@ -84,6 +109,22 @@ Set a threshold (`above` / `below`) on any spot, perpetual or Alpha pair. The
 engine watches the live feed while the terminal is open, fires a browser
 notification on the crossing, disables the rule so it cannot spam, and keeps it
 in `localStorage` so it survives a reload.
+
+## Routes
+
+| Route | What it is |
+| --- | --- |
+| `/` | War room: mood, arena, event stream, or the full table / heatmap |
+| `/spot` `/perp` `/alpha` | Full market table for each venue |
+| `/chart/:market/:symbol` | Candles, volume, MA/EMA on the price axis, RSI and MACD in their own panes |
+| `/events` | Event centre with rule and severity filters and editable thresholds |
+| `/studio` | Meme Studio — render a card from live data and export a PNG |
+| `/basis` | Cross-market basis radar |
+| `/screener` | Anomaly screener |
+| `/alerts` | Price alerts |
+| `/watchlists` | Watchlists |
+| `/profile` | Trader base: theme, pixel avatar, default home view |
+| `/settings` | Preferences |
 
 ## Data sources
 

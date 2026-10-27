@@ -1,6 +1,6 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import { AppLayout } from "@/components/layout";
-import { OverviewPage } from "@/features/spot/OverviewPage";
+import { HomePage } from "@/features/home/HomePage";
 import { SpotPage } from "@/features/spot/SpotPage";
 import { FuturesPage } from "@/features/futures/FuturesPage";
 import { AlphaPage } from "@/features/alpha/AlphaPage";
@@ -8,6 +8,9 @@ import { ChartPage } from "@/features/chart/ChartPage";
 import { ScreenerPage } from "@/features/screener/ScreenerPage";
 import { BasisPage } from "@/features/basis/BasisPage";
 import { AlertsPage } from "@/features/alerts/AlertsPage";
+import { EventsPage } from "@/features/events/EventsPage";
+import { StudioPage } from "@/features/studio/StudioPage";
+import { ProfilePage } from "@/features/profile/ProfilePage";
 import { WatchlistsPage } from "@/features/watchlist/WatchlistsPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 
@@ -18,13 +21,16 @@ export function App() {
   return (
     <Routes>
       <Route element={<AppLayout />}>
-        <Route path="/" element={<OverviewPage />} />
+        <Route path="/" element={<HomePage />} />
         <Route path="/spot" element={<SpotPage />} />
         <Route path="/perp" element={<FuturesPage />} />
         <Route path="/alpha" element={<AlphaPage />} />
         <Route path="/chart/:market/:symbol" element={<ChartPage />} />
         <Route path="/basis" element={<BasisPage />} />
         <Route path="/screener" element={<ScreenerPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/studio" element={<StudioPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/watchlists" element={<WatchlistsPage />} />
         <Route path="/settings" element={<SettingsPage />} />

@@ -12,7 +12,10 @@ test("overview loads live market rows", async ({ page }) => {
   });
   page.on("pageerror", (error) => errors.push(error.message));
 
-  await page.goto("/");
+  await page.goto("");
+  // The home screen opens on the arena; the full table is one click away.
+  await expect(page.getByTestId("sentiment-panel")).toBeVisible({ timeout: 90_000 });
+  await page.getByTestId("home-view-table").click();
   await expect(page.getByTestId("market-table")).toBeVisible({ timeout: 90_000 });
 
   await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
@@ -197,7 +200,7 @@ test("screener filters on real data", async ({ page }) => {
 });
 
 test("language toggle switches the interface", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("");
   await expect(page.getByTestId("global-search")).toBeVisible();
   const nav = page.getByRole("navigation", { name: "Primary" }).first();
   await expect(nav).toContainText("行情总览");

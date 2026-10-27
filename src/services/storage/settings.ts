@@ -4,6 +4,9 @@ import type { Language } from "@/types/market";
 
 const STORAGE_KEY = "crypto-radar:settings:v1";
 
+export type HomeView = "arena" | "table" | "heatmap";
+export type ThemeId = "neon" | "voltage" | "alarm";
+
 export interface AppSettings {
   language: Language;
   density: TableDensity;
@@ -23,6 +26,12 @@ export interface AppSettings {
   };
   interval: string;
   lastMarket: string;
+  /** Default presentation of the home screen. */
+  homeView: HomeView;
+  /** Accent theme. */
+  theme: ThemeId;
+  /** Pixel avatar id used on the trader base. */
+  avatar: string;
 }
 
 export const DEFAULT_SETTINGS: AppSettings = {
@@ -71,6 +80,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
   indicatorParams: { ma: 7, ema: 25, rsi: 14 },
   interval: "15m",
   lastMarket: "spot",
+  homeView: "arena",
+  theme: "neon",
+  avatar: "radar",
 };
 
 export function loadSettings(): AppSettings {
@@ -89,6 +101,15 @@ export function loadSettings(): AppSettings {
     columnOrder: Array.isArray(value.columnOrder)
       ? value.columnOrder
       : DEFAULT_SETTINGS.columnOrder,
+    homeView:
+      value.homeView === "table" || value.homeView === "heatmap" || value.homeView === "arena"
+        ? value.homeView
+        : DEFAULT_SETTINGS.homeView,
+    theme:
+      value.theme === "voltage" || value.theme === "alarm" || value.theme === "neon"
+        ? value.theme
+        : DEFAULT_SETTINGS.theme,
+    avatar: typeof value.avatar === "string" ? value.avatar : DEFAULT_SETTINGS.avatar,
   };
 }
 

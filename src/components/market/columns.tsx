@@ -1,4 +1,4 @@
-import type { MarketTicker } from "@/types/market";
+import type { MarketId, MarketTicker } from "@/types/market";
 import { formatCompact, formatPrice, formatTimeAgo } from "@/lib/format";
 import { PercentValue } from "./PercentValue";
 import { RangeBar } from "./RangeBar";
@@ -9,6 +9,8 @@ export interface ColumnDefinition {
   align?: "left" | "right";
   width: number;
   minWidth?: number;
+  /** Markets this column applies to. Omitted means every market. */
+  markets?: MarketId[];
   render: (ticker: MarketTicker, t: (path: string) => string) => React.ReactNode;
 }
 
@@ -73,6 +75,8 @@ export const COLUMNS: ColumnDefinition[] = [
     labelKey: "market.volume",
     align: "right",
     width: 92,
+    // Alpha tokens have no base volume, only turnover.
+    markets: ["spot", "futures"],
     render: (ticker) => <span className="cr-mono">{formatCompact(ticker.volume24h)}</span>,
   },
   {
@@ -96,6 +100,7 @@ export const COLUMNS: ColumnDefinition[] = [
     labelKey: "market.bidAsk",
     align: "right",
     width: 132,
+    markets: ["spot", "futures"],
     render: (ticker) => (
       <span className="cr-mono text-2xs">
         <span className="cr-up">{formatPrice(ticker.bidPrice, ticker.decimals)}</span>
@@ -109,6 +114,8 @@ export const COLUMNS: ColumnDefinition[] = [
     labelKey: "market.markPrice",
     align: "right",
     width: 96,
+    // Perpetual contracts only.
+    markets: ["futures"],
     render: (ticker) =>
       ticker.markPrice === null ? (
         <span className="cr-mono text-faint">--</span>
@@ -121,6 +128,7 @@ export const COLUMNS: ColumnDefinition[] = [
     labelKey: "market.fundingRate",
     align: "right",
     width: 96,
+    markets: ["futures"],
     render: (ticker) => {
       if (ticker.fundingRate === null) {
         return <span className="cr-mono text-faint">--</span>
@@ -137,6 +145,7 @@ export const COLUMNS: ColumnDefinition[] = [
     labelKey: "market.openInterest",
     align: "right",
     width: 96,
+    markets: ["futures"],
     render: (ticker) => (
       <span className="cr-mono">
         {ticker.openInterest === null ? "--" : formatCompact(ticker.openInterest)}
