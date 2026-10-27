@@ -26,6 +26,11 @@ endpoints, and every screen reacts to a live WebSocket feed.
 | **Technical indicators** | MA, EMA, RSI and MACD — each toggleable, configurable and rendered on top of the chart without a page reload. |
 | **Watchlists** | Multiple named lists, add/remove, rename, reorder, persisted in `localStorage` with corruption-safe reads. |
 | **Market screener** | Scans spot, perpetual and Alpha at the same time and renders the anomalies in a virtualised table: strong gainers, strong losers, high volume, elevated funding, short-term moves and a custom rule set. |
+| **Heatmap** | A turnover weighted treemap of the whole market: tile area is the 24 h turnover, colour is the 24 h change. One glance shows where the money is moving. |
+| **Basis radar** | The same asset priced on spot and on the perpetual contract, with the premium between them and the funding rate annualised — a cross-market view neither a spot table nor a futures table can give. |
+| **Price alerts** | Threshold rules evaluated against the live feed, delivered through a browser notification, persisted locally and re-armable. |
+| **Market breadth** | Advancers versus decliners drawn as a single stacked bar next to the leaderboard tabs. |
+| **24 h range bar** | Every row shows where the price sits between its 24 h low and high. |
 | **Bilingual UI** | Complete Chinese and English interfaces driven by one dictionary, with the choice persisted. |
 
 ## Screenshots
@@ -49,6 +54,36 @@ endpoints, and every screen reacts to a live WebSocket feed.
 | Phone — Alpha | Phone — screener |
 | --- | --- |
 | ![Phone alpha](docs/screenshots/mobile-alpha.png) | ![Phone screener](docs/screenshots/mobile-screener.png) |
+
+## The three features that set it apart
+
+| Heatmap | Basis radar |
+| --- | --- |
+| ![Heatmap](docs/screenshots/heatmap.png) | ![Basis radar](docs/screenshots/basis.png) |
+
+![Price alerts](docs/screenshots/alerts.png)
+
+### 1. Turnover weighted heatmap
+
+The table answers "what is moving"; the heatmap answers **where the money is**.
+Every pair becomes a tile sized by its 24 h turnover and coloured by its 24 h
+change, laid out with a squarified treemap so the tiles stay readable. One
+click returns to the table and the leaderboard filters still apply.
+
+### 2. Cross-market basis radar
+
+Spot and perpetual are two books on the same asset. The radar joins them on the
+base asset and shows the premium the contract trades at, plus the funding rate
+annualised (three settlements a day). A pair trading at a premium while paying
+positive funding is a carry cost; a discount paying negative funding is the
+mirror image. No single-market table can show this.
+
+### 3. Price alerts
+
+Set a threshold (`above` / `below`) on any spot, perpetual or Alpha pair. The
+engine watches the live feed while the terminal is open, fires a browser
+notification on the crossing, disables the rule so it cannot spam, and keeps it
+in `localStorage` so it survives a reload.
 
 ## Data sources
 

@@ -45,8 +45,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   visibleColumns: [
     "price",
     "changePercent",
-    "high",
-    "low",
+    "range",
     "volume",
     "quoteVolume",
     "markPrice",
@@ -57,6 +56,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
     "symbol",
     "price",
     "changePercent",
+    "range",
     "high",
     "low",
     "volume",

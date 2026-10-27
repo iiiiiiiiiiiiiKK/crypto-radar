@@ -6,6 +6,8 @@ import { FuturesPage } from "@/features/futures/FuturesPage";
 import { AlphaPage } from "@/features/alpha/AlphaPage";
 import { ChartPage } from "@/features/chart/ChartPage";
 import { ScreenerPage } from "@/features/screener/ScreenerPage";
+import { BasisPage } from "@/features/basis/BasisPage";
+import { AlertsPage } from "@/features/alerts/AlertsPage";
 import { WatchlistsPage } from "@/features/watchlist/WatchlistsPage";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 
@@ -21,7 +23,9 @@ export function App() {
         <Route path="/perp" element={<FuturesPage />} />
         <Route path="/alpha" element={<AlphaPage />} />
         <Route path="/chart/:market/:symbol" element={<ChartPage />} />
+        <Route path="/basis" element={<BasisPage />} />
         <Route path="/screener" element={<ScreenerPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/watchlists" element={<WatchlistsPage />} />
         <Route path="/settings" element={<SettingsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />

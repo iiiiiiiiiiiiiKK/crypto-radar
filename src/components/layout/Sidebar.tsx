@@ -14,7 +14,9 @@ const ITEMS: NavItem[] = [
   { to: "/spot", key: "nav.spot", icon: "◆" },
   { to: "/perp", key: "nav.futures", icon: "⬢" },
   { to: "/alpha", key: "nav.alpha", icon: "◈" },
+  { to: "/basis", key: "nav.basis", icon: "⇄" },
   { to: "/screener", key: "nav.screener", icon: "⚡" },
+  { to: "/alerts", key: "nav.alerts", icon: "◔" },
   { to: "/watchlists", key: "nav.watchlists", icon: "☆" },
   { to: "/settings", key: "nav.settings", icon: "⚙" },
 ];

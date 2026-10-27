@@ -5,6 +5,7 @@ import { MobileNav } from "./MobileNav";
 import { TopBar } from "./TopBar";
 import { useHotkeys } from "@/hooks/useHotkeys";
 import { useMarketStore } from "@/stores/marketStore";
+import { useAlertEngine } from "@/features/alerts/useAlertEngine";
 import { useSettingsStore } from "@/stores/settingsStore";
 import { MARKET_IDS } from "@/lib/constants/markets";
 import type { MarketId } from "@/types/market";
@@ -47,6 +48,8 @@ export function AppLayout() {
   }, []);
 
   useHotkeys({ onSearch, onDigit, onEscape });
+  // Alerts run while the terminal is open, on every page.
+  useAlertEngine();
 
   const isDetail = location.pathname.startsWith("/chart");
 

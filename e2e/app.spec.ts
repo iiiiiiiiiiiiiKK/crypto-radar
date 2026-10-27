@@ -125,6 +125,63 @@ test("perpetual market shows futures-only data", async ({ page }) => {
   expect(row).toMatch(/-?\d+\.\d{4}%/);
 });
 
+test("board tabs actually filter and order the table", async ({ page }) => {
+  await page.goto("spot");
+  await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
+
+  const firstText = async () =>
+    (await page.getByTestId("market-row").first().innerText()).replace(/\n/g, " | ");
+
+  await page.getByTestId("board-gainers").click();
+  await page.waitForTimeout(1500);
+  const gainers = await firstText();
+  expect(gainers).toMatch(/\+\d/);
+
+  await page.getByTestId("board-losers").click();
+  await page.waitForTimeout(1500);
+  const losers = await firstText();
+  expect(losers).toMatch(/-\d/);
+
+  await page.getByTestId("board-volume").click();
+  await page.waitForTimeout(1200);
+  await page.getByTestId("board-all").click();
+  await page.waitForTimeout(800);
+
+  // The two boards must not lead with the same pair.
+  expect(gainers).not.toBe(losers);
+});
+
+test("heatmap view renders turnover weighted tiles", async ({ page }) => {
+  await page.goto("spot");
+  await expect(page.getByTestId("market-row").first()).toBeVisible({ timeout: 90_000 });
+  await page.getByTestId("view-heatmap").click();
+  await expect(page.getByTestId("heatmap")).toBeVisible();
+  const tiles = page.getByTestId("heatmap-tile");
+  expect(await tiles.count()).toBeGreaterThan(10);
+  await page.getByTestId("view-list").click();
+  await expect(page.getByTestId("market-row").first()).toBeVisible();
+});
+
+test("basis radar joins spot and perpetual", async ({ page }) => {
+  await page.goto("basis");
+  await expect(page.getByTestId("basis-row").first()).toBeVisible({ timeout: 120_000 });
+  const rows = page.getByTestId("basis-row");
+  expect(await rows.count()).toBeGreaterThan(10);
+  const text = await rows.first().innerText();
+  expect(text).toMatch(/-?\d+\.\d{3}%/);
+});
+
+test("price alerts can be created and survive a reload", async ({ page }) => {
+  await page.goto("alerts");
+  await expect(page.getByTestId("alert-symbol")).toBeVisible({ timeout: 90_000 });
+  await page.getByTestId("alert-symbol").fill("BTCUSDT");
+  await page.getByTestId("alert-value").fill("100000");
+  await page.getByTestId("alert-add").click();
+  await expect(page.getByTestId("alert-row")).toHaveCount(1);
+  await page.reload();
+  await expect(page.getByTestId("alert-row")).toHaveCount(1);
+});
+
 test("screener filters on real data", async ({ page }) => {
   await page.goto("screener");
   await expect(page.getByTestId("screener-table")).toBeVisible({ timeout: 90_000 });

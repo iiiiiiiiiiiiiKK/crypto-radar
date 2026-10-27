@@ -1,6 +1,7 @@
 import type { MarketTicker } from "@/types/market";
 import { formatCompact, formatPrice, formatTimeAgo } from "@/lib/format";
 import { PercentValue } from "./PercentValue";
+import { RangeBar } from "./RangeBar";
 
 export interface ColumnDefinition {
   id: string;
@@ -73,6 +74,15 @@ export const COLUMNS: ColumnDefinition[] = [
     align: "right",
     width: 92,
     render: (ticker) => <span className="cr-mono">{formatCompact(ticker.volume24h)}</span>,
+  },
+  {
+    id: "range",
+    labelKey: "market.range",
+    align: "left",
+    width: 84,
+    render: (ticker) => (
+      <RangeBar low={ticker.low24h} high={ticker.high24h} price={ticker.price} />
+    ),
   },
   {
     id: "quoteVolume",

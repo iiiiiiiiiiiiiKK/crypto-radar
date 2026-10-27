@@ -7,8 +7,10 @@ import { useUiStore } from "@/stores/uiStore";
 import { useWatchlistStore } from "@/stores/watchlistStore";
 import { MarketTable } from "@/components/market/MarketTable";
 import { MobileMarketList } from "@/components/market/MobileMarketList";
+import { MarketHeatmap } from "@/components/market/MarketHeatmap";
 import { MarketToolbar } from "@/components/market/MarketToolbar";
 import { filterByQuote, filterTickers, sortTickers, type QuoteFilter } from "./sorting";
+import { applyBoard, marketBreadth, type Board, type MarketView } from "./board";
 import { makeEntry } from "@/services/storage/watchlists";
 import type { MarketId, MarketTicker } from "@/types/market";
 import type { SortState } from "@/types/ui";
@@ -45,12 +47,20 @@ export function MarketPanel({ market }: { market: MarketId }) {
 
   const [sort, setSort] = useState<SortState>({ key: "quoteVolume24h", desc: true });
   const [quoteFilter, setQuoteFilter] = useState<QuoteFilter>("usdt");
+  const [board, setBoard] = useState<Board>("all");
+  const [view, setView] = useState<MarketView>("list");
 
-  const rows = useMemo(() => {
+  const { rows, sort: effectiveSort } = useMemo(() => {
     const filtered = filterTickers(tickers, search);
     const quoted = filterByQuote(filtered, quoteFilter);
-    return sortTickers(quoted, sort);
-  }, [tickers, search, sort, quoteFilter]);
+    const boardApplied = applyBoard(quoted, board, sort);
+    return {
+      rows: sortTickers(boardApplied.rows, boardApplied.sort),
+      sort: boardApplied.sort,
+    };
+  }, [tickers, search, sort, quoteFilter, board]);
+
+  const breadth = useMemo(() => marketBreadth(rows), [rows]);
 
   const watchedKeys = useMemo(() => {
     const set = new Set<string>();
@@ -86,6 +96,11 @@ export function MarketPanel({ market }: { market: MarketId }) {
       <MarketToolbar
         rows={rows}
         total={tickers.length}
+        board={board}
+        onBoardChange={setBoard}
+        breadth={breadth}
+        view={view}
+        onViewChange={setView}
         visibleColumns={visibleColumns}
         onToggleColumn={(column) => toggleColumn(column as keyof ColumnVisibility)}
         columnOrder={columnOrder}
@@ -100,11 +115,13 @@ export function MarketPanel({ market }: { market: MarketId }) {
         activeListId={activeList?.id ?? null}
         onActiveListChange={setActiveList}
       />
-      {isMobile ? (
+      {view === "heatmap" ? (
+        <MarketHeatmap rows={rows} loading={loading} onOpenChart={openChart} />
+      ) : isMobile ? (
         <MobileMarketList
           rows={rows}
           market={market}
-          sort={sort}
+          sort={effectiveSort}
           onSortChange={setSort}
           watchedKeys={watchedKeys}
           onToggleWatch={toggleWatch}
@@ -120,7 +137,7 @@ export function MarketPanel({ market }: { market: MarketId }) {
           density={density}
           visibleColumns={visibleColumns}
           columnOrder={columnOrder}
-          sort={sort}
+          sort={effectiveSort}
           onSortChange={setSort}
           watchedKeys={watchedKeys}
           onToggleWatch={toggleWatch}
