@@ -21,7 +21,17 @@ const DEVICES = [
   ["Desktop", 1440, 900, 1, false],
 ];
 
-const PAGES = ["", "spot", "perp", "alpha", "screener", "watchlists", "settings"];
+const PAGES = [
+  "",
+  "spot",
+  "perp",
+  "alpha",
+  "basis",
+  "screener",
+  "alerts",
+  "watchlists",
+  "settings",
+];
 
 const lines = [];
 const browser = await chromium.launch({
