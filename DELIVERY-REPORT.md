@@ -42,8 +42,17 @@
   six rule templates plus a custom rule set, market and watchlist filters.
 - **Bilingual UI** — complete Chinese and English dictionaries, persisted.
 - **Keyboard shortcuts** — `/`, `Esc`, `1`/`2`/`3`, ignored while typing.
-- **Responsive layout** — dedicated mobile navigation and layout, no
-  horizontal overflow.
+- **Responsive layout** — a dedicated phone design, not a squeezed desktop
+  page: card rows instead of the nine-column grid, a two-row header (logo,
+  search, author link, connection state, language) plus a scrollable market
+  tab strip, a bottom navigation bar, a compact mobile toolbar, a phone chart
+  layout with a scrollable interval strip, and phone card lists for the market
+  table and the screener. Verified on iPhone SE (375), iPhone 13 (390),
+  iPhone 15 Pro Max (430), iPad mini (744) and desktop (1440): 35 page /
+  device combinations, zero horizontal overflow, zero clipped labels.
+- **Author link** — the author's X profile (https://x.com/0xkillcoin) is
+  reachable from the header on both layouts and opens in a new tab with
+  `rel="noopener noreferrer"`.
 - **GitHub Pages SPA fallback** — `public/404.html` restores deep links.
 
 ### Partially completed
@@ -76,8 +85,9 @@ All results below come from actual runs in this environment.
 | Lint | `npm run lint` | pass (0 errors, 0 warnings) |
 | Unit tests | `npm run test` | **62 passed / 62** (9 files) |
 | Production build | `npm run build` | pass — `index.js` 163 kB, `charts` 163 kB, `table` 177 kB (gzip 46/52/56 kB) |
-| E2E desktop | `npm run test:e2e -- --project=desktop-chrome` | **9 passed / 9** |
-| E2E mobile | `npm run test:e2e -- --project=mobile-chrome` | **9 passed / 9** |
+| E2E desktop | `npm run test:e2e -- --project=desktop-chrome` | **14 passed / 14** |
+| E2E mobile | `npm run test:e2e -- --project=mobile-chrome` | **14 passed / 14** |
+| Layout audit | `npm run audit:layout` | **35 / 35 page-device combinations clean** |
 | Live site check | `npm run verify:live` | all pages return live rows, screener 42 hits, chart renders, 0 console errors |
 | GitHub Actions CI | push to `main` | success |
 | GitHub Pages deploy | push to `main` | success |
@@ -94,6 +104,10 @@ All results below come from actual runs in this environment.
 7. The screener filters on real data across all markets.
 8. The language toggle switches the interface and persists.
 9. The mobile layout has no horizontal overflow.
+10. The phone renders the card list, not the desktop grid.
+11. The phone bottom navigation is visible and the sidebar is hidden.
+12. The phone chart keeps the interval and indicator controls reachable.
+13. The author X link points to https://x.com/0xkillcoin.
 
 ### What the unit suite covers
 
