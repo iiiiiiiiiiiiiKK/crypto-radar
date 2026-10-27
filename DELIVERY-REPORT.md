@@ -50,6 +50,20 @@
   table and the screener. Verified on iPhone SE (375), iPhone 13 (390),
   iPhone 15 Pro Max (430), iPad mini (744) and desktop (1440): 35 page /
   device combinations, zero horizontal overflow, zero clipped labels.
+- **Leaderboard tabs** — 涨幅榜 / 跌幅榜 / 成交额榜 filter and reorder the
+  live table (verified: the gainers board leads with a positive pair, the
+  losers board with a negative one).
+- **Turnover weighted heatmap** — a squarified treemap of up to 120 pairs;
+  tile area is the 24 h turnover, colour is the 24 h change.
+- **Basis radar** (/basis) — spot and perpetual joined on the base asset:
+  premium in percent, funding rate annualised, next settlement and turnover.
+  355 comparable pairs on the live market.
+- **Price alerts** (/alerts) — threshold rules evaluated against the live
+  feed, browser notification, persisted in localStorage, re-armable.
+- **Market breadth** — advancers versus decliners as a stacked bar next to
+  the leaderboard tabs.
+- **24 h range bar** — every row shows the position of the price between the
+  24 h low and high, on the desktop grid and on the phone card.
 - **Author link** — the author's X profile (https://x.com/0xkillcoin) is
   reachable from the header on both layouts and opens in a new tab with
   `rel="noopener noreferrer"`.
@@ -83,10 +97,10 @@ All results below come from actual runs in this environment.
 | --- | --- | --- |
 | Type check | `npm run typecheck` | pass (0 errors) |
 | Lint | `npm run lint` | pass (0 errors, 0 warnings) |
-| Unit tests | `npm run test` | **62 passed / 62** (9 files) |
+| Unit tests | `npm run test` | **75 passed / 75** (12 files) |
 | Production build | `npm run build` | pass — `index.js` 163 kB, `charts` 163 kB, `table` 177 kB (gzip 46/52/56 kB) |
-| E2E desktop | `npm run test:e2e -- --project=desktop-chrome` | **14 passed / 14** |
-| E2E mobile | `npm run test:e2e -- --project=mobile-chrome` | **14 passed / 14** |
+| E2E desktop | `npm run test:e2e -- --project=desktop-chrome` | **18 passed / 18** |
+| E2E mobile | `npm run test:e2e -- --project=mobile-chrome` | **18 passed / 18** |
 | Layout audit | `npm run audit:layout` | **35 / 35 page-device combinations clean** |
 | Live site check | `npm run verify:live` | all pages return live rows, screener 42 hits, chart renders, 0 console errors |
 | GitHub Actions CI | push to `main` | success |

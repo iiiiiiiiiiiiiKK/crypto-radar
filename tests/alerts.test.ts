@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { createRule, isRule, loadAlerts, saveAlerts } from "@/services/storage/alerts";
+import { createRule, isRule, isTriggered, loadAlerts, saveAlerts } from "@/services/storage/alerts";
 
 describe("alert storage", () => {
   beforeEach(() => {
@@ -20,6 +20,20 @@ describe("alert storage", () => {
     expect(restored).toHaveLength(1);
     expect(restored[0].symbol).toBe("ETHUSDT");
     expect(restored[0].direction).toBe("below");
+  });
+
+  it("triggers only when the price crosses the threshold", () => {
+    const above = createRule("spot", "BTCUSDT", "above", 80000);
+    expect(isTriggered(above, 79999)).toBe(false);
+    expect(isTriggered(above, 80000)).toBe(true);
+    expect(isTriggered(above, 81000)).toBe(true);
+
+    const below = createRule("spot", "BTCUSDT", "below", 70000);
+    expect(isTriggered(below, 70001)).toBe(false);
+    expect(isTriggered(below, 70000)).toBe(true);
+    expect(isTriggered(below, 69000)).toBe(true);
+
+    expect(isTriggered(above, Number.NaN)).toBe(false);
   });
 
   it("drops corrupted entries instead of throwing", () => {

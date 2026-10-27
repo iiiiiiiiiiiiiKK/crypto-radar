@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { getAdapter } from "@/services/binance";
+import { isTriggered } from "@/services/storage/alerts";
 import { useAlertStore } from "@/stores/alertStore";
 import type { MarketId } from "@/types/market";
 
@@ -37,9 +38,7 @@ export function useAlertEngine(intervalMs = 15_000): void {
           if (rule.market !== market) continue;
           const ticker = bySymbol.get(rule.symbol);
           if (!ticker) continue;
-          const hit =
-            rule.direction === "above" ? ticker.price >= rule.value : ticker.price <= rule.value;
-          if (!hit) continue;
+          if (!isTriggered(rule, ticker.price)) continue;
           markTriggered(rule.id, ticker.price);
           notify(rule.symbol, rule.direction, rule.value, ticker.price);
         }

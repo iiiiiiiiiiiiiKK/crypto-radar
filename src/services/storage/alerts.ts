@@ -44,6 +44,12 @@ export function isRule(value: unknown): value is AlertRule {
   );
 }
 
+/** True when the live price satisfies the rule. */
+export function isTriggered(rule: AlertRule, price: number): boolean {
+  if (!Number.isFinite(price)) return false;
+  return rule.direction === "above" ? price >= rule.value : price <= rule.value;
+}
+
 export function createRule(
   market: MarketId,
   symbol: string,
