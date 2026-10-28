@@ -52,8 +52,9 @@ export function ConnectionPill({ market }: { market?: MarketId }) {
       }
     >
       <span className={`dot dot--${tone}`} />
-      {market ? MARKET_TAG[market] : "FEED"} {STATE_LABEL[state]}
-      {age !== null ? <span className="dim">{age}s</span> : null}
+      <span className="pill__market">{market ? MARKET_TAG[market] : "FEED"}</span>
+      <span className="pill__state">{STATE_LABEL[state]}</span>
+      {age !== null ? <span className="dim pill__age">{age}s</span> : null}
     </span>
   );
 }

@@ -1057,11 +1057,6 @@
   color: var(--up);
 }
 
-.mkt__th--left,
-.mkt__cell--left {
-  text-align: left;
-}
-
 .mkt__cell {
   padding: 0 10px;
   text-align: right;
@@ -1071,6 +1066,13 @@
   color: var(--ink);
   white-space: nowrap;
   overflow: hidden;
+}
+
+/* Must come after `.mkt__cell`: same specificity, so source order decides and
+   the left-aligned symbol column was silently reverting to right alignment. */
+.mkt__th--left,
+.mkt__cell--left {
+  text-align: left;
 }
 
 .mkt__cell--dim {

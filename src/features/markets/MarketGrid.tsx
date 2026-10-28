@@ -97,8 +97,12 @@ export function MarketGrid({
     overscan: 12,
   });
 
+  // The star column must be as wide as the 40px touch target on phones,
+  // otherwise the button overflows into the symbol column.
   const template = compact
-    ? `24px minmax(84px, 1fr) ${columns.map((column) => `${Math.round(column.width * 0.78)}px`).join(" ")}`
+    ? `40px minmax(96px, 1fr) ${columns
+        .map((column) => `minmax(${Math.round(column.width * 0.82)}px, auto)`)
+        .join(" ")}`
     : `34px minmax(112px, 1.3fr) ${columns.map((column) => `minmax(${column.width}px, 1fr)`).join(" ")}`;
 
   const items = virtualizer.getVirtualItems();

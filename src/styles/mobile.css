@@ -100,13 +100,50 @@
     padding-bottom: calc(var(--mobilebar-h) + env(safe-area-inset-bottom) + 8px);
   }
 
+  /* Explicit two-row grid: brand + status on row one, search on row two.
+     Flex wrap made this three rows (143px) as soon as the pill grew to 40px,
+     because brand 163px + controls 205px exceeded the 366px content width. */
   .topbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "brand right"
+      "search search";
+    align-items: center;
     min-height: 52px;
     padding: 6px 12px;
-    gap: 8px;
-    /* Keep the sticky header from growing past two rows when the keyboard is
-       open on small screens. */
-    row-gap: 6px;
+    gap: 6px 8px;
+  }
+
+  .topbar .brand {
+    grid-area: brand;
+    min-width: 0;
+  }
+
+  .topbar__right {
+    grid-area: right;
+    margin-left: 0;
+    justify-self: end;
+  }
+
+  .topbar .search {
+    grid-area: search;
+    order: 0;
+    width: 100%;
+  }
+
+  /* Compact status chip: the market prefix is redundant next to the icons. */
+  .topbar__right .pill {
+    gap: 5px;
+    padding: 0 9px;
+  }
+
+  .topbar__right .pill__market {
+    display: none;
+  }
+
+  .topbar__right .pill__age {
+    font-size: 9px;
   }
 
   .brand__word {
@@ -272,8 +309,45 @@
     display: none;
   }
 
+  /* Two price cards cannot sit side by side in a half-width cell: each got
+     ~70px while the price needs ~100px, so the grid overflowed its cell by
+     19px and visually collided with the coverage cell. Stack them instead and
+     drop the sparkline, which keeps the cell the same total height. */
   .sitrep__cell--bench .grid {
-    gap: 10px !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 6px !important;
+  }
+
+  .sitrep__cell--bench .pulse__spark {
+    display: none;
+  }
+
+  .sitrep__cell--bench .pulse__px {
+    font-size: 16px;
+  }
+
+  .sitrep__cell--bench .pulse__sym {
+    font-size: 11px;
+  }
+
+  /* The eyebrow label is wider than the half-width cell; truncate rather than
+     wrap onto a second line and push the content down. */
+  .sitrep__cell--third .sitrep__eyebrow,
+  .sitrep__cell--bench .sitrep__eyebrow {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+  }
+
+  /* Coverage numbers stay on one line per stat. */
+  .sitrep__cell--third .breadth__legend {
+    font-size: 9px;
+  }
+
+  .sitrep__cell--third .breadth__legend span {
+    white-space: nowrap;
   }
 
   /* The "sample / scope / updated" note is orientation text; one line is
@@ -301,11 +375,12 @@
     overflow: hidden;
   }
 
-  /* Secondary coverage detail collapses into one inline stat row so the
-     event feed is reachable within the first screen. */
+  /* Secondary coverage detail. Three columns inside a 156px cell left 47px
+     each, so the "资金费率中位" label itself overflowed by 7px. Two columns
+     give every stat room for its label and its value. */
   .sitrep__cell--third .kv {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 10px;
   }
 
   .sitrep__cell--third .kv__row {
@@ -313,16 +388,23 @@
     gap: 0;
     padding: 3px 0;
     border-bottom: 0;
+    min-width: 0;
   }
 
   .sitrep__cell--third .kv__k {
     font-size: 8.5px;
-    letter-spacing: 0.06em;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sitrep__cell--third .kv__v {
     text-align: left;
     font-size: 11.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .sitrep__cell--third .mood__note {
@@ -923,5 +1005,142 @@
 
   .ivbar__btn {
     min-width: 40px;
+  }
+}
+/* --- 14. One control height on phones ----------------------------------- */
+
+/* Status pills (FEED / 行情通道 / 页面状态) must line up with the buttons next
+   to them: 22px pills beside 40px buttons looked broken. 40px is also the
+   minimum comfortable tap height, so the pill becomes tappable where it is
+   interactive (the retry pill). */
+@media (max-width: 900px) {
+  .pill {
+    height: 40px;
+    min-height: 40px;
+    padding: 0 12px;
+    font-size: 10.5px;
+    gap: 6px;
+  }
+
+  /* The top bar keeps every chip on the same 40px baseline. */
+  .topbar__right {
+    align-items: center;
+  }
+
+  .topbar__right .pill,
+  .topbar__right .social,
+  .topbar__right .btn--icon {
+    height: 40px;
+    min-height: 40px;
+  }
+
+  /* X was 44px wide against a 40px square beside it. */
+  .social {
+    width: 40px;
+    min-width: 40px;
+    padding: 0;
+  }
+
+  .social__glyph {
+    font-size: 15px;
+  }
+
+  /* Page action row: keep the three controls on one line and one height. */
+  .page__head-actions {
+    align-items: center;
+  }
+
+  .page__head-actions .pill,
+  .page__head-actions .btn {
+    height: 40px;
+    min-height: 40px;
+  }
+
+  /* A segmented control wrapped 40px buttons in 2px padding + a 1px border and
+     rendered 46px next to a 40px pill. The frame is drawn with an inset
+     outline instead of a border, so it costs no layout height: the container
+     and every button are exactly 40px and all remain valid tap targets. */
+  .seg {
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border: 0;
+    outline: 1px solid var(--line-2);
+    outline-offset: -1px;
+    gap: 0;
+  }
+
+  .seg__btn {
+    height: 40px;
+    min-height: 40px;
+  }
+
+  .seg__btn[data-active="true"] {
+    /* The active chip needs its own 1px separation now that the frame is an
+       outline rather than a border. */
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+  }
+
+  .page__head-actions .seg {
+    height: 40px;
+    min-height: 40px;
+  }
+
+  /* A scrolling pill row must not stretch to the last item's height. */
+  .panel__tools .pill,
+  .panel__head .pill {
+    height: 30px;
+    min-height: 30px;
+    font-size: 9.5px;
+    padding: 0 8px;
+  }
+}
+/* --- 15. Market row: a compact symbol cell ------------------------------ */
+
+@media (max-width: 900px) {
+  /* With the star column fixed at 40px the symbol cell no longer needs the
+     generous padding that made it look half empty. */
+  .mkt__cell--left {
+    padding: 0 6px;
+    overflow: hidden;
+  }
+
+  .mkt .mkt__row > .mkt__cell:nth-child(2),
+  .mkt .mkt__head > .mkt__th:nth-child(2) {
+    padding-left: 2px;
+  }
+
+  /* The symbol column had 168px and used ~34% of it while the price/delta
+     columns were cramped: cap the symbol column and hand the slack to data. */
+  .mkt .mkt__row,
+  .mkt .mkt__head {
+    grid-template-columns: 40px minmax(72px, 0.9fr) 1.05fr 0.95fr !important;
+  }
+
+  .sym {
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .sym__base {
+    font-size: 12px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sym__quote {
+    font-size: 9px;
+  }
+
+  /* The market tag costs 36px and repeats what the segmented control above
+     already says, so phones drop it and keep the row for data. */
+  .mkt__row .sym + .tag {
+    display: none;
+  }
+
+  /* Values keep their own column width; no clipping of the delta. */
+  .mkt__cell .delta {
+    font-size: 11.5px;
   }
 }
